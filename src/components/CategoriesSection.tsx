@@ -1,34 +1,42 @@
+import { useEffect, useState } from "react";
 import CategoryItem from "./CategoryItem";
+import customFetch from "../axios/custom";
 
 const CategoriesSection = () => {
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await customFetch.get("/categories");
+        setCategories(response.data.data || response.data);
+      } catch (error) {
+        console.error("Error fetching categories", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   return (
-    <div className="max-w-screen-2xl px-5 mx-auto mt-24">
-      <h2 className="text-black text-5xl font-normal tracking-[1.56px] max-sm:text-4xl mb-12">
-        Our Categories
-      </h2>
-      <div className="flex justify-between flex-wrap gap-y-10">
-        <CategoryItem
-          categoryTitle="Special Edition"
-          image="luxury category 1.png"
-          link="special-edition"
-        />
-        <CategoryItem
-          categoryTitle="Luxury Collection"
-          image="luxury category 2.png"
-          link="luxury-collection"
-        />
-        <CategoryItem
-          categoryTitle="Summer Edition"
-          image="luxury category 3.png"
-          link="summer-edition"
-        />
-        <CategoryItem
-          categoryTitle="Unique Collection"
-          image="luxury category 4.png"
-          link="unique-collection"
-        />
+    <section className="max-w-[1400px] mx-auto px-6 py-30 bg-[#fafafa]">
+     <div className="flex flex-col items-center mb-8">
+  <h2 className="text-[12px] md:text-[22px] uppercase tracking-[0.5em] text-gray-600 font-medium">
+    Our Collections
+  </h2>
+  {/* خط صغير تحت العنوان */}
+  <div className="w-10 h-[2px] bg-gray-300 mt-3"></div>
+</div>
+      <div className="grid grid-cols-2 gap-6 max-w-[1500px] mx-auto">
+        {categories.map((cat: any) => (
+          <CategoryItem
+            key={cat._id}
+            categoryTitle={cat.name} 
+            categoryId={cat._id} 
+          />
+        ))}
       </div>
-    </div>
+    </section>
   );
 };
+
 export default CategoriesSection;

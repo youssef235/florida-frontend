@@ -7,13 +7,16 @@ interface Product {
   popularity: number;
   stock: number;
 }
-
-interface ProductInCart extends Product {
+interface ProductInCart {
   id: string;
+  productId: string;
+  priceTag: string;
+  title: string;
+  price: number;
   quantity: number;
-  size: string;
-  color: string;
-  stock: number;
+  image?: string;
+  size?: string;
+  color?: string;
 }
 
 interface User {

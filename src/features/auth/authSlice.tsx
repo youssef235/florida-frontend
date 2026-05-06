@@ -4,24 +4,30 @@ type AuthState = {
   loginStatus: boolean;
 };
 
+const checkAuthStatus = (): boolean => {
+  const token = localStorage.getItem("token");
+  const user = localStorage.getItem("user");
+  return !!(token && user); // لازم الاثنين يكونوا موجودين
+};
+
 const initialState: AuthState = {
-  loginStatus: JSON.parse(localStorage.getItem("user") || "{}").id
-    ? true
-    : false,
+  loginStatus: checkAuthStatus(),
 };
 
 export const authSlice = createSlice({
   name: "auth",
-  // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
     setLoginStatus: (state, action: PayloadAction<boolean>) => {
       state.loginStatus = action.payload;
-      
     },
+    logout: (state) => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      state.loginStatus = false;
+    }
   },
 });
 
-export const { setLoginStatus } = authSlice.actions;
-
+export const { setLoginStatus, logout } = authSlice.actions;
 export default authSlice.reducer;

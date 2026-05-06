@@ -15,23 +15,22 @@ const Register = () => {
     // Check if form data is valid
     if (!checkRegisterFormData(data)) return;
 
-    // Check if user with this email already exists
-    const users = await customFetch.get("/users");
-    const userExists = users.data.some(
-      (user: { email: string }) => user.email === data.email
-    );
-    if (userExists) {
-      toast.error("User with this email already exists");
-      return;
-    }
+    try {
+      // إرسال طلب التسجيل للباك إند
+      const response = await customFetch.post("/authentication/local/sign-up", {
+        firstName: data.name,      // Mapper: firstName
+        lastName: data.lastname,   // Mapper: lastName
+        email: data.email,
+        password: data.password,
+      });
 
-    // Register user
-    const response = await customFetch.post("/users", data);
-    if (response.status === 201) {
-      toast.success("User registered successfully");
-      navigate("/login");
-    } else {
-      toast.error("An error occurred. Please try again");
+      if (response.status === 201) {
+        toast.success("User registered successfully");
+        navigate("/login");
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Registration failed";
+      toast.error(Array.isArray(message) ? message[0] : message);
     }
   };
 

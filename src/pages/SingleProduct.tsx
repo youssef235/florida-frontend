@@ -1,180 +1,172 @@
-import {
-  Button,
-  Dropdown,
-  ProductItem,
-  QuantityInput,
-  StandardSelectInput,
-} from "../components";
 import { useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { addProductToTheCart } from "../features/cart/cartSlice";
-import { useAppDispatch } from "../hooks";
-import WithSelectInputWrapper from "../utils/withSelectInputWrapper";
-import WithNumberInputWrapper from "../utils/withNumberInputWrapper";
-import { formatCategoryName } from "../utils/formatCategoryName";
+import { addProductToTheCart, syncCart } from "../features/cart/cartSlice";
+import { useAppDispatch, useAppSelector } from "../hooks";
 import toast from "react-hot-toast";
+import customFetch from "../axios/custom";
+import { Dropdown } from "../components";
 
 const SingleProduct = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [singleProduct, setSingleProduct] = useState<Product | null>(null);
-  // defining default values for input fields
-  const [size, setSize] = useState<string>("xs");
-  const [color, setColor] = useState<string>("black");
-  const [quantity, setQuantity] = useState<number>(1);
+  const [singleProduct, setSingleProduct] = useState<any>(null);
+  const [size, setSize] = useState<string>("");
   const params = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
-
-  // defining HOC instances
-  const SelectInputUpgrade = WithSelectInputWrapper(StandardSelectInput);
-  const QuantityInputUpgrade = WithNumberInputWrapper(QuantityInput);
+  const { isLoading } = useAppSelector((state) => state.cart);
+  const serverUrl = customFetch.defaults.baseURL;
 
   useEffect(() => {
     const fetchSingleProduct = async () => {
-      const response = await fetch(
-        `http://localhost:3000/products/${params.id}`
-      );
-      const data = await response.json();
-      setSingleProduct(data);
+      try {
+        const response = await customFetch.get(`/products/${params.id}`);
+        setSingleProduct(response.data);
+      } catch (error) {
+        toast.error("Error fetching product");
+      }
     };
-
-    const fetchProducts = async () => {
-      const response = await fetch("http://localhost:3000/products");
-      const data = await response.json();
-      setProducts(data);
-    };
-    fetchSingleProduct();
-    fetchProducts();
+    if (params.id) fetchSingleProduct();
   }, [params.id]);
 
-  const handleAddToCart = () => {
-    if (singleProduct) {
-      dispatch(
-        addProductToTheCart({
-          id: singleProduct.id + size + color,
-          image: singleProduct.image,
-          title: singleProduct.title,
-          category: singleProduct.category,
-          price: singleProduct.price,
-          quantity,
-          size,
-          color,
-          popularity: singleProduct.popularity,
-          stock: singleProduct.stock,
-        })
-      );
-      toast.success("Product added to the cart");
-    }
-  };
+const handleAddToCart = async () => {
+  if (!size) {
+    toast.error("Please select a size");
+    return;
+  }
+  if (!singleProduct || isLoading) return; // ✅ امنع double click
 
-  return (
-    <div className="max-w-screen-2xl mx-auto px-5 max-[400px]:px-3">
-      <div className="grid grid-cols-3 gap-x-8 max-lg:grid-cols-1">
-        <div className="lg:col-span-2">
-          <img
-            src={`/assets/${singleProduct?.image}`}
-            alt={singleProduct?.title}
-          />
-        </div>
-        <div className="w-full flex flex-col gap-5 mt-9">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-4xl">{singleProduct?.title}</h1>
-            <div className="flex justify-between items-center">
-              <p className="text-base text-secondaryBrown">
-                {formatCategoryName(singleProduct?.category || "")}
-              </p>
-              <p className="text-base font-bold">${ singleProduct?.price }</p>
-            </div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <SelectInputUpgrade
-              selectList={[
-                { id: "xs", value: "XS" },
-                { id: "sm", value: "SM" },
-                { id: "m", value: "M" },
-                { id: "lg", value: "LG" },
-                { id: "xl", value: "XL" },
-                { id: "2xl", value: "2XL" },
-              ]}
-              value={size}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                setSize(() => e.target.value)
-              }
-            />
-            <SelectInputUpgrade
-              selectList={[
-                { id: "black", value: "BLACK" },
-                { id: "red", value: "RED" },
-                { id: "blue", value: "BLUE" },
-                { id: "white", value: "WHITE" },
-                { id: "rose", value: "ROSE" },
-                { id: "green", value: "GREEN" },
-              ]}
-              value={color}
-              onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                setColor(() => e.target.value)
-              }
-            />
+  const selectedPriceTag = singleProduct.priceTags?.[0];
+  const currentPrice = selectedPriceTag?.price || 0;
+  const selectedColor = singleProduct.colors?.[0] || "Standard";
+  const productId = singleProduct._id;
+  const priceTagId = selectedPriceTag?._id;
 
-            <QuantityInputUpgrade
-              value={quantity}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setQuantity(() => parseInt(e.target.value))
-              }
-            />
-          </div>
-          <div className="flex flex-col gap-3">
-            <Button mode="brown" text="Add to cart" onClick={handleAddToCart} />
-            <p className="text-secondaryBrown text-sm text-right">
-              Delivery estimated on the Friday, July 26
-            </p>
-          </div>
-          <div>
-            {/* drowdown items */}
-            <Dropdown dropdownTitle="Description">
-              Lorem ipsum dolor, sit amet consectetur adipisicing elit. Labore
-              quos deleniti, mollitia, vitae harum suscipit voluptatem quasi, ab
-              assumenda accusantium rem praesentium accusamus quae quam tempore
-              nostrum corporis eaque. Mollitia.
-            </Dropdown>
+  if (!productId || !priceTagId) {
+    toast.error("Product data is incomplete");
+    return;
+  }
 
-            <Dropdown dropdownTitle="Product Details">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Fuga ad
-              at odio illo, necessitatibus, reprehenderit dolore voluptas ea
-              consequuntur ducimus repellat soluta mollitia facere sapiente.
-              Unde provident possimus hic dolore.
-            </Dropdown>
+  dispatch(addProductToTheCart({
+    id: productId + size + selectedColor,
+    productId,
+    priceTag: priceTagId,
+    title: singleProduct.name,
+    price: currentPrice,
+    quantity: 1,
+    image: singleProduct.images?.[0],
+    size,
+    color: selectedColor,
+  }));
 
-            <Dropdown dropdownTitle="Delivery Details">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Fuga ad
-              at odio illo, necessitatibus, reprehenderit dolore voluptas ea
-              consequuntur ducimus repellat soluta mollitia facere sapiente.
-              Unde provident possimus hic dolore.
-            </Dropdown>
-          </div>
+  // ✅ await عشان ما يتبعتش مرتين
+  await dispatch(syncCart());
+
+  toast.success("Added to your bag");
+};
+  if (!singleProduct) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-pulse tracking-widest text-xs uppercase text-gray-400">
+          Loading details...
         </div>
       </div>
+    );
+  }
 
-      {/* similar products */}
-      <div>
-        <h2 className="text-black/90 text-5xl mt-24 mb-12 text-center max-lg:text-4xl">
-          Similar Products
-        </h2>
-        <div className="flex flex-wrap justify-between items-center gap-y-8 mt-12 max-xl:justify-start max-xl:gap-5 ">
-          {products.slice(0, 3).map((product: Product) => (
-            <ProductItem
-              key={product?.id}
-              id={product?.id}
-              image={product?.image}
-              title={product?.title}
-              category={product?.category}
-              price={product?.price}
-              popularity={product?.popularity}
-              stock={product?.stock}
-            />
-          ))}
+  return (
+    <div className="bg-white min-h-screen">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-10 py-12 lg:py-20">
+        <div className="flex flex-col lg:flex-row gap-12 xl:gap-24">
+
+          {/* الصور */}
+          <div className="lg:w-3/5 order-2 lg:order-1">
+            <div className="grid grid-cols-1 gap-6">
+              {singleProduct.images?.map((img: string, index: number) => (
+                <div key={index} className="overflow-hidden bg-gray-50 rounded-lg">
+                  <img
+                    src={`${serverUrl}${img}`}
+                    className="w-full h-full object-cover hover:scale-[1.02] transition-transform duration-700"
+                    alt={`${singleProduct.name} - view ${index + 1}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* المعلومات */}
+          <div className="lg:w-2/5 order-1 lg:order-2">
+            <div className="lg:sticky lg:top-32 space-y-8">
+
+              {/* العنوان والسعر */}
+              <div className="border-b border-gray-100 pb-6">
+                <h1 className="text-3xl font-medium tracking-tight text-gray-900 leading-tight">
+                  {singleProduct.name}
+                </h1>
+                <p className="text-2xl mt-4 font-light text-gray-600">
+                  {singleProduct.priceTags?.[0]?.price?.toLocaleString()} EGP
+                </p>
+              </div>
+
+              {/* المقاسات */}
+              <div className="space-y-4">
+                <div className="flex justify-between items-center text-xs uppercase tracking-widest font-semibold">
+                  <span>Select Size</span>
+                  <button className="text-gray-400 underline hover:text-black transition-colors">
+                    Size Guide
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {["XS", "S", "M", "L", "XL"].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setSize(s)}
+                      className={`min-w-[60px] h-12 flex items-center justify-center border text-sm transition-all duration-300 rounded-sm ${
+                        size === s
+                          ? "border-black bg-black text-white shadow-lg shadow-black/10"
+                          : "border-gray-200 text-gray-500 hover:border-black hover:text-black"
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* زرار الإضافة */}
+              <button
+                onClick={handleAddToCart}
+                disabled={isLoading}
+                className="w-full bg-black text-white py-5 rounded-sm text-[11px] font-bold uppercase tracking-[0.3em] hover:bg-zinc-800 transition-all active:scale-[0.98] shadow-xl shadow-black/5 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? "Syncing..." : "Add to Bag"}
+              </button>
+
+              {/* التفاصيل */}
+              <div className="pt-8 space-y-1">
+                <Dropdown dropdownTitle="Product Description">
+                  <div className="text-[15px] leading-relaxed text-gray-500 py-4 font-light italic">
+                    {singleProduct.description || "No description available for this piece."}
+                  </div>
+                </Dropdown>
+                <Dropdown dropdownTitle="Composition & Care">
+                  <div className="text-[14px] leading-relaxed text-gray-500 py-4 space-y-2">
+                    <p>• 100% Organic Cotton</p>
+                    <p>• Machine wash at 30°C</p>
+                    <p>• Do not tumble dry</p>
+                  </div>
+                </Dropdown>
+                <Dropdown dropdownTitle="Shipping & Returns">
+                  <div className="text-[14px] leading-relaxed text-gray-500 py-4 font-light">
+                    Free standard delivery on orders above 2000 EGP. Returns within 14 days.
+                  </div>
+                </Dropdown>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
   );
 };
+
 export default SingleProduct;

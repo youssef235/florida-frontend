@@ -1,530 +1,222 @@
-import { HiTrash as TrashIcon } from "react-icons/hi2";
-import { Button } from "../components";
+import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks";
-import { removeProductFromTheCart } from "../features/cart/cartSlice";
-import customFetch from "../axios/custom";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { checkCheckoutFormData } from "../utils/checkCheckoutFormData";
-
-/*
-address: "Marka Markovic 22"
-apartment: "132"
-cardNumber: "21313"
-city: "Belgrade"
-company: "Bojan Cesnak"
-country: "United States"
-cvc: "122"
-emailAddress: "kuzma@gmail.com"
-expirationDate: "12312"
-firstName: "Aca22"
-lastName: "Kuzma"
-nameOnCard: "Aca JK"
-paymentType: "on"
-phone: "06123123132"
-postalCode: "11080"
-region: "Serbia"
-*/
-
-const paymentMethods = [
-  { id: "credit-card", title: "Credit card" },
-  { id: "paypal", title: "PayPal" },
-  { id: "etransfer", title: "eTransfer" },
-];
+import customFetch from "../axios/custom";
+import { clearCart, syncCart } from "../features/cart/cartSlice";
 
 const Checkout = () => {
   const { productsInCart, subtotal } = useAppSelector((state) => state.cart);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
-  const handleCheckoutSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const [form, setForm] = useState({
+    firstName: "", lastName: "",
+    addressLineOne: "", city: "", zipCode: "", contactNumber: "",
+  });
+
+  const shipping = subtotal > 500 || subtotal === 0 ? 0 : 20;
+  const tax = subtotal * 0.14;
+  const total = subtotal + shipping + tax;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData);
-
-    const checkoutData = {
-      data,
-      products: productsInCart,
-      subtotal: subtotal,
-    };
-
-    if (!checkCheckoutFormData(checkoutData)) return;
-
-    let response;
-    if (JSON.parse(localStorage.getItem("user") || "{}").email) {
-      response = await customFetch.post("/orders", {
-        ...checkoutData,
-        user: {
-          email: JSON.parse(localStorage.getItem("user") || "{}").email,
-          id: JSON.parse(localStorage.getItem("user") || "{}").id,
-        },
-        orderStatus: "Processing",
-        orderDate: new Date().toISOString(),
-      });
-    } else {
-      response = await customFetch.post("/orders", {
-        ...checkoutData,
-        orderStatus: "Processing",
-        orderDate: new Date().toLocaleDateString(),
-      });
+    if (productsInCart.length === 0) { toast.error("Your bag is empty"); return; }
+    if (!form.firstName || !form.lastName || !form.addressLineOne || !form.city || !form.zipCode || !form.contactNumber) {
+      toast.error("Please fill all required fields");
+      return;
     }
 
-    if (response.status === 201) {
-      toast.success("Order has been placed successfully");
+    setLoading(true);
+    try {
+      const orderItems = productsInCart.map((p) => ({
+        product: p.productId,
+        priceTag: p.priceTag,
+        price: p.price,
+        quantity: p.quantity,
+      }));
+
+// ✅ عدّل handleSubmit بعد نجاح الـ request
+      await customFetch.post("/orders", {
+        orderItems,
+        deliveryInfo: form,
+        discount: 0,
+      });
+
+      dispatch(clearCart());
+      await dispatch(syncCart()); // ✅ يفضي الكارت من الباك إند كمان
+      toast.success("Order placed successfully!");
       navigate("/order-confirmation");
-    } else {
-      toast.error("Something went wrong, please try again later");
+
+      navigate("/order-confirmation");
+    } catch {
+      toast.error("Something went wrong, please try again");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="mx-auto max-w-screen-2xl">
-      <div className="pb-24 pt-16 px-5 max-[400px]:px-3">
-        <h2 className="sr-only">Checkout</h2>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+        .co-root { font-family: 'DM Sans', sans-serif; background: #F7F5F2; min-height: 100vh; }
+        .co-label { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: #999; font-weight: 500; display: block; margin-bottom: 0.5rem; }
+        .co-input {
+          width: 100%; background: #fff; border: 1px solid rgba(0,0,0,0.1);
+          border-radius: 10px; padding: 0.85rem 1rem; font-family: 'DM Sans', sans-serif;
+          font-size: 0.95rem; color: #0D0D0D; outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .co-input:focus { border-color: #0D0D0D; box-shadow: 0 0 0 3px rgba(13,13,13,0.06); }
+        .co-input::placeholder { color: #CCC; }
+        .co-btn {
+          width: 100%; background: #0D0D0D; color: #F7F5F2;
+          border: none; border-radius: 14px; padding: 1.15rem;
+          font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+          letter-spacing: -0.01em; cursor: pointer;
+          transition: background 0.2s, transform 0.15s;
+        }
+        .co-btn:hover:not(:disabled) { background: #222; transform: translateY(-1px); }
+        .co-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .co-title { font-family: 'Syne', sans-serif; font-weight: 800; letter-spacing: -0.04em; color: #0D0D0D; }
+        .co-section-title { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #0D0D0D; margin-bottom: 1.25rem; }
+        .co-card { background: #fff; border-radius: 20px; padding: 2rem; border: 1px solid rgba(0,0,0,0.06); }
+        .co-item-img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; background: #F2F0ED; flex-shrink: 0; }
+        .co-row { display: flex; justify-content: space-between; font-size: 0.88rem; color: #888; margin-bottom: 0.75rem; }
+        .co-row-val { color: #0D0D0D; font-weight: 500; }
+        .co-divider { border: none; border-top: 1px solid rgba(0,0,0,0.07); margin: 1.25rem 0; }
+        .co-total-label { font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #AAA; }
+        .co-total-val { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; color: #0D0D0D; }
+        .co-field { margin-bottom: 1.25rem; }
+        .co-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media(max-width: 640px) { .co-grid2 { grid-template-columns: 1fr; } }
+      `}</style>
 
-        <form
-          onSubmit={handleCheckoutSubmit}
-          className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16"
-        >
-          <div>
-            <div>
-              <h2 className="text-lg font-medium text-gray-900">
-                Contact information
-              </h2>
+      <div className="co-root">
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "3rem 1.5rem" }}>
 
-              <div className="mt-4">
-                <label
-                  htmlFor="email-address"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Email address
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="email"
-                    id="email-address"
-                    name="emailAddress"
-                    autoComplete="email"
-                    className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                    required={true}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-10 border-t border-gray-200 pt-10">
-              <h2 className="text-lg font-medium text-gray-900">
-                Shipping information
-              </h2>
-
-              <div className="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4">
-                <div>
-                  <label
-                    htmlFor="first-name"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    First name
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      id="first-name"
-                      name="firstName"
-                      autoComplete="given-name"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="last-name"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Last name
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      id="last-name"
-                      name="lastName"
-                      autoComplete="family-name"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label
-                    htmlFor="company"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Company
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      name="company"
-                      id="company"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label
-                    htmlFor="address"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Address
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      name="address"
-                      id="address"
-                      autoComplete="street-address"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label
-                    htmlFor="apartment"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Apartment, suite, etc.
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      name="apartment"
-                      id="apartment"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="city"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    City
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      name="city"
-                      id="city"
-                      autoComplete="address-level2"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="country"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Country
-                  </label>
-                  <div className="mt-1">
-                    <select
-                      id="country"
-                      name="country"
-                      autoComplete="country-name"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    >
-                      <option>United States</option>
-                      <option>Canada</option>
-                      <option>Mexico</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="region"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    State / Province
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      name="region"
-                      id="region"
-                      autoComplete="address-level1"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="postal-code"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Postal code
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      name="postalCode"
-                      id="postal-code"
-                      autoComplete="postal-code"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-
-                <div className="sm:col-span-2">
-                  <label
-                    htmlFor="phone"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Phone
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      name="phone"
-                      id="phone"
-                      autoComplete="tel"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Payment */}
-            <div className="mt-10 border-t border-gray-200 pt-10">
-              <h2 className="text-lg font-medium text-gray-900">Payment</h2>
-
-              <fieldset className="mt-4">
-                <legend className="sr-only">Payment type</legend>
-                <div className="space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
-                  {paymentMethods.map((paymentMethod, paymentMethodIdx) => (
-                    <div key={paymentMethod.id} className="flex items-center">
-                      {paymentMethodIdx === 0 ? (
-                        <input
-                          id={paymentMethod.id}
-                          name="paymentType"
-                          type="radio"
-                          defaultChecked
-                          className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                      ) : (
-                        <input
-                          id={paymentMethod.id}
-                          name="paymentType"
-                          type="radio"
-                          className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                      )}
-
-                      <label
-                        htmlFor={paymentMethod.id}
-                        className="ml-3 block text-sm font-medium text-gray-700"
-                      >
-                        {paymentMethod.title}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </fieldset>
-
-              <div className="mt-6 grid grid-cols-4 gap-x-4 gap-y-6">
-                <div className="col-span-4">
-                  <label
-                    htmlFor="card-number"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Card number
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      id="card-number"
-                      name="cardNumber"
-                      autoComplete="cc-number"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-
-                <div className="col-span-4">
-                  <label
-                    htmlFor="name-on-card"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Name on card
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      id="name-on-card"
-                      name="nameOnCard"
-                      autoComplete="cc-name"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-
-                <div className="col-span-3">
-                  <label
-                    htmlFor="expiration-date"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Expiration date (MM/YY)
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      name="expirationDate"
-                      id="expiration-date"
-                      autoComplete="cc-exp"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="cvc"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    CVC
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      name="cvc"
-                      id="cvc"
-                      autoComplete="csc"
-                      className="block w-full py-2 indent-2 border-gray-300 outline-none focus:border-gray-400 border border shadow-sm sm:text-sm"
-                      required={true}
-                    />
-                  </div>
-                </div>
-              </div>
+          {/* Header */}
+          <div style={{ marginBottom: "2.5rem" }}>
+            <div className="co-title" style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", lineHeight: 1 }}>Checkout</div>
+            <div style={{ fontSize: "0.82rem", color: "#AAA", marginTop: "0.4rem", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+              {productsInCart.length} item{productsInCart.length !== 1 ? "s" : ""} · EGP {subtotal.toFixed(0)}
             </div>
           </div>
 
-          {/* Order summary */}
-          <div className="mt-10 lg:mt-0">
-            <h2 className="text-lg font-medium text-gray-900">Order summary</h2>
+          <form onSubmit={handleSubmit}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "2rem" }}
+                 className="lg:grid lg:grid-cols-12 lg:gap-x-10">
 
-            <div className="mt-4 border border-gray-200 bg-white shadow-sm">
-              <h3 className="sr-only">Items in your cart</h3>
-              <ul role="list" className="divide-y divide-gray-200">
-                {productsInCart.map((product) => (
-                  <li key={product?.id} className="flex px-4 py-6 sm:px-6">
-                    <div className="flex-shrink-0">
-                      <img
-                        src={`/assets/${product?.image}`}
-                        alt={product?.title}
-                        className="w-20 rounded-md"
-                      />
+              {/* Left — Form */}
+              <div className="lg:col-span-7" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+
+                {/* Delivery */}
+                <div className="co-card">
+                  <div className="co-section-title">Delivery Information</div>
+                  <div className="co-grid2">
+                    <div className="co-field">
+                      <label className="co-label">First Name *</label>
+                      <input className="co-input" name="firstName" placeholder="Ahmed" value={form.firstName} onChange={handleChange} required />
                     </div>
-
-                    <div className="ml-6 flex flex-1 flex-col">
-                      <div className="flex">
-                        <div className="min-w-0 flex-1">
-                          <h4 className="text-sm font-medium text-gray-700 hover:text-gray-800">
-                            {product?.title}
-                          </h4>
-                          <p className="mt-1 text-sm text-gray-500">
-                            {product?.color}
-                          </p>
-                          <p className="mt-1 text-sm text-gray-500">
-                            {product?.size}
-                          </p>
-                        </div>
-
-                        <div className="ml-4 flow-root flex-shrink-0">
-                          <button
-                            type="button"
-                            className="-m-2.5 flex items-center justify-center bg-white p-2.5 text-gray-400 hover:text-gray-500"
-                            onClick={() =>
-                              dispatch(
-                                removeProductFromTheCart({ id: product?.id })
-                              )
-                            }
-                          >
-                            <span className="sr-only">Remove</span>
-                            <TrashIcon className="h-5 w-5" aria-hidden="true" />
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-1 items-end justify-between pt-2">
-                        <p className="mt-1 text-sm font-medium text-gray-900">
-                          ${product?.price}
-                        </p>
-
-                        <div className="ml-4">
-                          <p className="text-base">
-                            Quantity: {product?.quantity}
-                          </p>
-                        </div>
-                      </div>
+                    <div className="co-field">
+                      <label className="co-label">Last Name *</label>
+                      <input className="co-input" name="lastName" placeholder="Mohamed" value={form.lastName} onChange={handleChange} required />
                     </div>
-                  </li>
-                ))}
-              </ul>
-              <dl className="space-y-6 border-t border-gray-200 px-4 py-6 sm:px-6">
-                <div className="flex items-center justify-between">
-                  <dt className="text-sm">Subtotal</dt>
-                  <dd className="text-sm font-medium text-gray-900">
-                    ${subtotal}
-                  </dd>
+                  </div>
+                  <div className="co-field">
+                    <label className="co-label">Address *</label>
+                    <input className="co-input" name="addressLineOne" placeholder="123 El Tahrir Square" value={form.addressLineOne} onChange={handleChange} required />
+                  </div>
+                  <div className="co-grid2">
+                    <div className="co-field">
+                      <label className="co-label">City *</label>
+                      <input className="co-input" name="city" placeholder="Cairo" value={form.city} onChange={handleChange} required />
+                    </div>
+                    <div className="co-field">
+                      <label className="co-label">Postal Code *</label>
+                      <input className="co-input" name="zipCode" placeholder="11511" value={form.zipCode} onChange={handleChange} required />
+                    </div>
+                  </div>
+                  <div className="co-field" style={{ marginBottom: 0 }}>
+                    <label className="co-label">Phone Number *</label>
+                    <input className="co-input" name="contactNumber" placeholder="+20 10 0000 0000" value={form.contactNumber} onChange={handleChange} required />
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-sm">Shipping</dt>
-                  <dd className="text-sm font-medium text-gray-900">
-                    ${subtotal ? 5 : 0}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between">
-                  <dt className="text-sm">Taxes</dt>
-                  <dd className="text-sm font-medium text-gray-900">
-                    ${subtotal ? subtotal / 5 : 0}
-                  </dd>
-                </div>
-                <div className="flex items-center justify-between border-t border-gray-200 pt-6">
-                  <dt className="text-base font-medium">Total</dt>
-                  <dd className="text-base font-medium text-gray-900">
-                    ${subtotal ? subtotal + 5 + subtotal / 5 : 0}
-                  </dd>
-                </div>
-              </dl>
 
-              <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
-                <Button text="Confirm Order" mode="brown" />
+                {/* Payment note */}
+                <div className="co-card" style={{ background: "#0D0D0D", color: "#fff" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div style={{ fontSize: "1.5rem" }}>🔒</div>
+                    <div>
+                      <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "0.95rem", marginBottom: "0.2rem" }}>Cash on Delivery</div>
+                      <div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.5)", fontWeight: 300 }}>Pay when your order arrives at your door</div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
+
+              {/* Right — Summary */}
+              <div className="lg:col-span-5">
+                <div style={{ position: "sticky", top: "2rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+
+                  {/* Items */}
+                  <div className="co-card">
+                    <div className="co-section-title">Your Order</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "1.5rem" }}>
+                      {productsInCart.map((p) => (
+                        <div key={p.id} style={{ display: "flex", gap: "0.85rem", alignItems: "center" }}>
+                          <img
+                            src={`${customFetch.defaults.baseURL}${p.image}`}
+                            alt={p.title}
+                            className="co-item-img"
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 600, fontSize: "0.88rem", color: "#0D0D0D", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.title}</div>
+                            <div style={{ fontSize: "0.75rem", color: "#AAA", marginTop: "0.15rem" }}>{p.size} · {p.color} · Qty {p.quantity}</div>
+                          </div>
+                          <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "0.9rem", color: "#0D0D0D", flexShrink: 0 }}>
+                            EGP {(p.price * p.quantity).toFixed(0)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <hr className="co-divider" />
+
+                    <div className="co-row"><span>Subtotal</span><span className="co-row-val">EGP {subtotal.toFixed(0)}</span></div>
+                    <div className="co-row"><span>Shipping</span><span className="co-row-val" style={shipping === 0 ? { color: "#5FD87D" } : {}}>{shipping === 0 ? "Free" : `EGP ${shipping}`}</span></div>
+                    <div className="co-row" style={{ marginBottom: 0 }}><span>Tax (14%)</span><span className="co-row-val">EGP {tax.toFixed(0)}</span></div>
+
+                    <hr className="co-divider" />
+
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+                      <div className="co-total-label">Total</div>
+                      <div className="co-total-val">EGP {total.toFixed(0)}</div>
+                    </div>
+                  </div>
+
+                  <button type="submit" className="co-btn" disabled={loading || productsInCart.length === 0}>
+                    {loading ? "Placing Order..." : `Place Order · EGP ${total.toFixed(0)}`}
+                  </button>
+
+                  <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#BBB", letterSpacing: "0.05em" }}>
+                    By placing your order you agree to our terms & conditions
+                  </p>
+                </div>
+              </div>
+
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
+
 export default Checkout;

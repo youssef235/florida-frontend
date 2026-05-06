@@ -4,6 +4,13 @@
 
 body {
   font-family: "Merriweather", serif;
+  /* اللون الجديد للموقع بالكامل */
+  background-color: #fafafa;
+  /* لضمان تغطية كامل طول الشاشة */
+  min-height: 100vh;
+  /* تحسين ظهور الألوان */
+  -webkit-font-smoothing: antialiased;
+  color: #000; 
 }
 
 .banner {
@@ -13,21 +20,24 @@ body {
       rgba(0, 0, 0, 0.25) 0%,
       rgba(0, 0, 0, 0.15) 100%
     ),
-    url("/assets/banner1.jpg") lightgray 50% / cover no-repeat;
-  background-position: 10% 25%;
+    url("/assets/c2.jpeg") no-repeat;
+  background-size: cover; 
+  background-position: center; 
 }
 
 .shop-banner {
+  min-height: 400px; 
   background: linear-gradient(
       0deg,
       rgba(0, 0, 0, 0.25) 0%,
       rgba(0, 0, 0, 0.25) 100%
     ),
-    url("/assets/shopbanner1.png") lightgray 3.589px 1.817px / 100% 197.462%
-      no-repeat;
+    url("/assets/shopbanner1.png") no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
-/* Add these styles to your CSS file */
+/* Animations */
 .sidebar-enter {
   transform: translateX(-100%);
   transition: transform 0.3s ease-in-out;
@@ -43,11 +53,8 @@ body {
   transform: translateX(-100%);
 }
 
-
-.singleOrder-table td{
-  text-align: left;
-}
-
-.singleOrder-table th{
+/* Table Styles */
+.singleOrder-table td, 
+.singleOrder-table th {
   text-align: left;
 }
