@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { HiOutlineShoppingBag, HiOutlineEye } from "react-icons/hi";
+import { useImageUrl } from "../hooks/useImageUrl";
 
 interface ProductItemProps {
   id: string;
@@ -12,18 +13,24 @@ interface ProductItemProps {
   variant?: "minimal" | "detailed";
 }
 
-const SERVER_URL = "https://embezzle-phoenix-swinging.ngrok-free.dev";
+const ProductItem = ({
+  id,
+  image,
+  title,
+  category,
+  price,
+  hasDiscount,
+  oldPrice,
+  variant = "minimal",
+}: ProductItemProps) => {
+  const imgSrc = useImageUrl(image);
 
-const getImageUrl = (path: string) =>
-  `${SERVER_URL}${path.startsWith("/") ? path : "/" + path}?ngrok-skip-browser-warning=true`;
-
-const ProductItem = ({ id, image, title, category, price, hasDiscount, oldPrice, variant = "minimal" }: ProductItemProps) => {
   return (
     <div className="group flex flex-col w-full bg-white transition-all duration-300">
       <div className="relative overflow-hidden bg-[#f4f4f4] aspect-[3/4]">
         <Link to={`/product/${id}`}>
           <img
-            src={image ? getImageUrl(image) : "/assets/placeholder.png"}
+            src={imgSrc}
             alt={title}
             className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110"
             onError={(e) => {
@@ -53,11 +60,13 @@ const ProductItem = ({ id, image, title, category, price, hasDiscount, oldPrice,
         )}
       </div>
 
-      <div className={`
-        flex flex-col gap-1.5 px-3 py-4 transition-colors duration-300
-        bg-[#fbfbfb] border-t border-[#f1f1f1]
-        ${variant === "detailed" ? "items-center text-center" : "items-start text-left"}
-      `}>
+      <div
+        className={`
+          flex flex-col gap-1.5 px-3 py-4 transition-colors duration-300
+          bg-[#fbfbfb] border-t border-[#f1f1f1]
+          ${variant === "detailed" ? "items-center text-center" : "items-start text-left"}
+        `}
+      >
         <p className="text-[9px] text-gray-400 uppercase tracking-[0.25em] font-bold">
           {category}
         </p>
@@ -70,7 +79,11 @@ const ProductItem = ({ id, image, title, category, price, hasDiscount, oldPrice,
         </Link>
 
         <div className="flex items-center gap-2 mt-0.5">
-          <span className={`text-[13px] ${hasDiscount ? "text-red-600 font-bold" : "font-semibold text-black"}`}>
+          <span
+            className={`text-[13px] ${
+              hasDiscount ? "text-red-600 font-bold" : "font-semibold text-black"
+            }`}
+          >
             {price.toLocaleString()} EGP
           </span>
           {hasDiscount && oldPrice && (

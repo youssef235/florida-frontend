@@ -1,23 +1,20 @@
 import { Link } from "react-router-dom";
+import { useImageUrl } from "../hooks/useImageUrl";
 
-const SERVER_URL = "https://embezzle-phoenix-swinging.ngrok-free.dev";
-
-const getImageUrl = (path: string | undefined) => {
-  if (!path) return "/assets/placeholder.png"; // Return placeholder if path is missing
-  return `${SERVER_URL}${path.startsWith("/") ? path : "/" + path}?ngrok-skip-browser-warning=true`;
-};
 interface CategoryItemProps {
   categoryTitle: string;
   categoryId: string;
-  categoryImage: string; // بيجي من الـ API: "/uploads/categories/..."
+  categoryImage: string;
 }
 
 const CategoryItem = ({ categoryTitle, categoryId, categoryImage }: CategoryItemProps) => {
+  const imgSrc = useImageUrl(categoryImage);
+
   return (
     <Link to={`/shop/${categoryTitle}`} className="group relative block overflow-hidden rounded-2xl">
       <div className="aspect-[4/5] overflow-hidden">
         <img
-          src={getImageUrl(categoryImage)}
+          src={imgSrc}
           alt={categoryTitle}
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
           onError={(e) => {
