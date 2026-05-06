@@ -1,24 +1,28 @@
 import { Link } from "react-router-dom";
-import defaultImg from "/src/assets/T-shirt.jpg";
 
-// ماب لصور الكاتيجوري بناءً على الاسم
-const categoryImages: { [key: string]: string } = {
-  "تيشرت": "/src/assets/tt.jpg",
-  "بنطلون": "/src/assets/pp.jpg",
-  "جاكيت": "/src/assets/jj.jpg",
-  "قميص": "/src/assets/ss.jpg",
+const SERVER_URL = "https://embezzle-phoenix-swinging.ngrok-free.dev";
+
+const getImageUrl = (path: string | undefined) => {
+  if (!path) return "/assets/placeholder.png"; // Return placeholder if path is missing
+  return `${SERVER_URL}${path.startsWith("/") ? path : "/" + path}?ngrok-skip-browser-warning=true`;
 };
+interface CategoryItemProps {
+  categoryTitle: string;
+  categoryId: string;
+  categoryImage: string; // بيجي من الـ API: "/uploads/categories/..."
+}
 
-const CategoryItem = ({ categoryTitle, categoryId }: { categoryTitle: string; categoryId: string }) => {
-  const localImage = categoryImages[categoryTitle] || defaultImg;
-
+const CategoryItem = ({ categoryTitle, categoryId, categoryImage }: CategoryItemProps) => {
   return (
     <Link to={`/shop/${categoryTitle}`} className="group relative block overflow-hidden rounded-2xl">
       <div className="aspect-[4/5] overflow-hidden">
         <img
-          src={localImage}
+          src={getImageUrl(categoryImage)}
           alt={categoryTitle}
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "/assets/placeholder.png";
+          }}
         />
       </div>
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-90 group-hover:opacity-100 transition" />

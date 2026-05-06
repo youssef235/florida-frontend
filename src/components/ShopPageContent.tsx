@@ -7,6 +7,7 @@ import {
   ShopFilterAndSort,
   ShowingPagination,
 } from "../components";
+import customFetch from "../axios/custom";
 
 interface Category {
   _id: string;
@@ -41,7 +42,7 @@ const ShopPageContent = ({
       try {
         setIsLoadingCats(true);
         // تأكد من صحة الرابط الخاص بالـ API بتاعك
-        const response = await axios.get("https://embezzle-phoenix-swinging.ngrok-free.dev/categories");
+const response = await customFetch.get("/categories");
         setCategories(response.data.data || response.data);
       } catch (error) {
         console.error("Failed to fetch categories:", error);

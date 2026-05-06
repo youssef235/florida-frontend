@@ -27,13 +27,14 @@ const CategoriesSection = () => {
   <div className="w-10 h-[2px] bg-gray-300 mt-3"></div>
 </div>
       <div className="grid grid-cols-2 gap-6 max-w-[1500px] mx-auto">
-        {categories.map((cat: any) => (
-          <CategoryItem
-            key={cat._id}
-            categoryTitle={cat.name} 
-            categoryId={cat._id} 
-          />
-        ))}
+  {categories.map((cat: any) => (
+  <CategoryItem
+    key={cat._id}
+    categoryTitle={cat.name || "Untitled"}
+    categoryId={cat._id}
+    categoryImage={cat.image} // Even if this is undefined, the new getImageUrl handles it
+  />
+))}
       </div>
     </section>
   );
