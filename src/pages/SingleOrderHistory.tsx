@@ -99,7 +99,7 @@ const SingleOrderHistory = () => {
                         <td className="so-td">
                           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                             <img
-                              src={`http://localhost:4000${item.product?.images?.[0]}`}
+                              src={`https://embezzle-phoenix-swinging.ngrok-free.dev${item.product?.images?.[0]}`}
                               alt={item.product?.name}
                               className="so-product-img"
                             />

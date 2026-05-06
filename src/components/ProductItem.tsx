@@ -13,7 +13,7 @@ interface ProductItemProps {
 }
 
 const ProductItem = ({ id, image, title, category, price, hasDiscount, oldPrice, variant = "minimal" }: ProductItemProps) => {
-  const serverUrl = "http://localhost:4000";
+  const serverUrl = "https://embezzle-phoenix-swinging.ngrok-free.dev";
 
   return (
     <div className="group flex flex-col w-full bg-white transition-all duration-300">

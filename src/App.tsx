@@ -1,4 +1,5 @@
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import WishlistPage from "./pages/WishlistPage";
 import {
   Cart,
   Checkout,
@@ -46,6 +47,10 @@ const router = createBrowserRouter([
         element: <Cart />,
       },
       {
+        path: "wishlist",
+        element: <WishlistPage />,
+      },
+      {
         path: "checkout",
         element: <Checkout />,
         action: checkoutAction,
@@ -79,7 +84,7 @@ const router = createBrowserRouter([
       {
         path: "order-history/:id",
         element: <SingleOrderHistory />,
-        loader: singleOrderLoader
+        loader: singleOrderLoader,
       },
     ],
   },

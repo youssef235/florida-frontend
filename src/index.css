@@ -1,60 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: "Merriweather", serif;
-  /* اللون الجديد للموقع بالكامل */
-  background-color: #fafafa;
-  /* لضمان تغطية كامل طول الشاشة */
-  min-height: 100vh;
-  /* تحسين ظهور الألوان */
-  -webkit-font-smoothing: antialiased;
-  color: #000; 
+@layer base {
+  body {
+    /* Montserrat للـ Headings و Inter للنصوص الطويلة لراحة العين */
+    font-family: 'Inter', sans-serif;
+    background-color: #fafafa;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #1a1a1a; /* لون أسود ناعم بدلاً من الأسود الصريح */
+  }
+
+  h1, h2, h3, h4, h5, h6, .logo-font {
+    font-family: 'Montserrat', sans-serif;
+  }
 }
 
+/* تحسين الـ Banners بلمسة ناعمة */
 .banner {
-  height: 800px;
+  height: 80vh; /* يفضل استخدام vh ليكون متجاوب أكثر */
+  min-height: 600px;
   background: linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0.25) 0%,
-      rgba(0, 0, 0, 0.15) 100%
+      to bottom,
+      rgba(0, 0, 0, 0.1) 0%,
+      rgba(0, 0, 0, 0.3) 100%
     ),
     url("/assets/c2.jpeg") no-repeat;
   background-size: cover; 
   background-position: center; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .shop-banner {
   min-height: 400px; 
   background: linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0.25) 0%,
-      rgba(0, 0, 0, 0.25) 100%
+      rgba(0, 0, 0, 0.2),
+      rgba(0, 0, 0, 0.2)
     ),
     url("/assets/shopbanner1.png") no-repeat;
   background-size: cover;
   background-position: center;
 }
 
-/* Animations */
+/* Animations - تحسين الأنيميشن ليكون أسرع وأكثر سلاسة */
 .sidebar-enter {
   transform: translateX(-100%);
-  transition: transform 0.3s ease-in-out;
 }
 .sidebar-enter-active {
   transform: translateX(0);
-}
-.sidebar-exit {
-  transform: translateX(0);
-  transition: transform 0.3s ease-in-out;
-}
-.sidebar-exit-active {
-  transform: translateX(-100%);
+  transition: transform 400px cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Table Styles */
-.singleOrder-table td, 
+/* Table Styles - لمسة عصرية للجداول */
+.singleOrder-table {
+  @apply w-full border-collapse;
+}
+
 .singleOrder-table th {
+  @apply bg-gray-50 text-gray-600 font-semibold py-3 px-4 border-b border-gray-100;
   text-align: left;
+}
+
+.singleOrder-table td {
+  @apply py-4 px-4 border-b border-gray-50 transition-colors hover:bg-gray-50/50;
+  text-align: left;
+}
+
+/* Custom Scrollbar عشان الروقان يكمل */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d1d1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
 }

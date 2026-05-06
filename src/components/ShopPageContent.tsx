@@ -29,16 +29,19 @@ const ShopPageContent = ({
 
   const { totalProducts } = useAppSelector((state) => state.shop);
 
+  // تحديث الحالة عند تغيير الـ URL (مثلاً عند الضغط على تصنيف من القائمة الجانبية أو الهيدر)
   useEffect(() => {
     setActiveCategory(initialCategory || "all");
     setCurrentPage(initialPage || 1);
   }, [initialCategory, initialPage]);
 
+  // جلب التصنيفات من السيرفر
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         setIsLoadingCats(true);
-        const response = await axios.get("http://localhost:4000/categories");
+        // تأكد من صحة الرابط الخاص بالـ API بتاعك
+        const response = await axios.get("https://embezzle-phoenix-swinging.ngrok-free.dev/categories");
         setCategories(response.data.data || response.data);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
@@ -49,38 +52,83 @@ const ShopPageContent = ({
     fetchCategories();
   }, []);
 
+  // دالة التعامل مع تغيير التصنيف لضمان إعادة الصفحة لـ 1
   const handleCategoryChange = (catName: string) => {
     setActiveCategory(catName);
     setCurrentPage(1);
   };
 
+  // دالة التعامل مع تغيير السعر
+  const handlePriceChange = (range: { min?: number; max?: number }) => {
+    setPriceRange(range);
+    setCurrentPage(1);
+  };
+
+  // دالة التعامل مع الترتيب
+  const handleSortChange = (val: string) => {
+    setSortCriteria(val);
+    setCurrentPage(1);
+  };
+
   return (
-    <div className="max-w-[1800px] mx-auto pb-20">
-      {/* استدعاء مكون الفلترة العرضي الجديد */}
+    <main className="min-h-screen bg-[#fafafa]">
+      {/* 1. قسم الفلاتر - Sticky & Mobile Ready */}
       <ShopFilterAndSort
         sortCriteria={sortCriteria}
-        setSortCriteria={(val) => { setSortCriteria(val); setCurrentPage(1); }}
+        setSortCriteria={handleSortChange}
         activeCategory={activeCategory}
         setActiveCategory={handleCategoryChange}
         categories={categories}
         priceRange={priceRange}
-        setPriceRange={(range) => { setPriceRange(range); setCurrentPage(1); }}
+        setPriceRange={handlePriceChange}
         totalProducts={totalProducts}
       />
 
-      <div className="px-5 mt-10">
-        <ProductGridWrapper
-          sortCriteria={sortCriteria}
-          category={activeCategory}
-          minPrice={priceRange.min}
-          maxPrice={priceRange.max}
-          page={currentPage}
-          limit={15} // عرض المزيد من المنتجات لأننا ألغينا الـ Sidebar
-        >
-          <ProductGrid variant="detailed" />
-        </ProductGridWrapper>
+      {/* 2. محتوى المنتجات */}
+      <div className="max-w-[1800px] mx-auto px-4 md:px-8">
+        
+        {/* شريط حالة البحث الصغير (اختياري للروقان) */}
+        {(activeCategory !== "all" || priceRange.min !== undefined) && (
+          <div className="mt-6 flex flex-wrap gap-2 items-center animate-fadeIn">
+            <span className="text-[11px] font-bold uppercase text-gray-400">Filters:</span>
+            {activeCategory !== "all" && (
+              <span className="bg-white border border-gray-200 px-3 py-1 rounded-full text-[10px] font-bold">
+                Category: {activeCategory}
+              </span>
+            )}
+            {priceRange.min !== undefined && (
+              <span className="bg-white border border-gray-200 px-3 py-1 rounded-full text-[10px] font-bold">
+                Price Filter Active
+              </span>
+            )}
+            <button 
+              onClick={() => {
+                setActiveCategory("all");
+                setPriceRange({});
+              }}
+              className="text-[10px] font-bold text-red-500 underline ml-2"
+            >
+              Clear All
+            </button>
+          </div>
+        )}
 
-        <div className="mt-20 border-t border-gray-100 pt-10">
+        {/* شبكة المنتجات */}
+        <div className="mt-8 md:mt-12">
+          <ProductGridWrapper
+            sortCriteria={sortCriteria}
+            category={activeCategory}
+            minPrice={priceRange.min}
+            maxPrice={priceRange.max}
+            page={currentPage}
+            limit={12} // رقم مناسب للـ Grid في الموبايل والديسكتوب
+          >
+            <ProductGrid variant="detailed" />
+          </ProductGridWrapper>
+        </div>
+
+        {/* 3. الترقيم (Pagination) */}
+        <div className="mt-16 mb-20 py-10 border-t border-gray-100 flex justify-center">
           <ShowingPagination
             page={currentPage}
             category={activeCategory}
@@ -88,7 +136,7 @@ const ShopPageContent = ({
           />
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

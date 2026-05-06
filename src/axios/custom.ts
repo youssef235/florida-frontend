@@ -1,12 +1,13 @@
 import axios from "axios";
 
 const customFetch = axios.create({
-    baseURL: "http://localhost:4000",
-    headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-    }
-})
+  baseURL: "https://embezzle-phoenix-swinging.ngrok-free.dev",
+  headers: {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    "ngrok-skip-browser-warning": "true", // ⬅️ أضف ده
+  },
+});
 
 // إضافة التوكن تلقائياً لكل الطلبات
 customFetch.interceptors.request.use((config) => {
