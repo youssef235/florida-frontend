@@ -40,7 +40,7 @@ const SingleOrderHistory = () => {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-        .so-root { font-family:'DM Sans',sans-serif; background:#F7F5F2; min-height:100vh; }
+        .so-root { font-family:'DM Sans',sans-serif; background:#ffffff; min-height:100vh; }
         .so-title { font-family:'Syne',sans-serif; font-weight:800; letter-spacing:-0.04em; color:#0D0D0D; font-size:clamp(1.8rem,4vw,3rem); line-height:1; }
         .so-card { background:#fff; border-radius:20px; border:1px solid rgba(0,0,0,0.06); padding:2rem; }
         .so-dark-card { background:#0D0D0D; border-radius:20px; padding:2rem; color:#fff; }

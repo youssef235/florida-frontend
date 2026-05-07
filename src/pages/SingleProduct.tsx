@@ -97,18 +97,17 @@ const SingleProduct = () => {
     toast.success("Added to Bag");
   };
 
-  const toggleWishlist = async () => {
-    if (!params.id) return;
+const toggleWishlist = async () => {
+  if (!params.id) return;
 
-    if (isWishlisted) {
-      await dispatch(removeFromWishlist(params.id));
-      toast.success("Removed from wishlist");
-    } else {
-      await dispatch(addToWishlist(params.id));
-      toast.success("Added to wishlist");
-    }
-  };
+  if (isWishlisted) {
+    await dispatch(removeFromWishlist(params.id));
+  } else {
+    await dispatch(addToWishlist(params.id));
+  }
 
+  await dispatch(fetchWishlist()); // 🔥 مهم للتحديث الفوري
+};
   if (!singleProduct) return null;
 
   return (
@@ -174,13 +173,21 @@ const SingleProduct = () => {
               {singleProduct.name}
             </h1>
 
-            <button onClick={toggleWishlist} className="transition-colors">
-              {isWishlisted ? (
-                <HiHeart className="w-6 h-6 text-red-500" />
-              ) : (
-                <HiOutlineHeart className="w-6 h-6 text-gray-300 hover:text-red-500" />
-              )}
-            </button>
+          <button
+  onClick={toggleWishlist}
+  className="relative group transition-all"
+>
+  {isWishlisted ? (
+    <HiHeart className="w-6 h-6 text-red-500 transition-all duration-200 scale-110" />
+  ) : (
+    <HiOutlineHeart className="w-6 h-6 text-gray-400 group-hover:text-red-400 transition-all duration-200" />
+  )}
+
+  {/* glow effect */}
+  {isWishlisted && (
+    <span className="absolute inset-0 rounded-full bg-red-500/10 blur-md scale-150" />
+  )}
+</button>
           </div>
 
           <p className="text-xl lg:text-2xl font-semibold text-gray-900 mb-8">
@@ -226,9 +233,39 @@ const SingleProduct = () => {
               </div>
             </Dropdown>
           </div>
+
+          {/* ✅ Add to Cart - Desktop only */}
+          <div className="hidden lg:flex flex-col gap-3 mt-8 pt-6 border-t border-gray-100">
+            <button
+              onClick={handleAddToCart}
+              disabled={isLoading}
+              className="w-full bg-black text-white h-14 rounded-full flex items-center justify-center gap-3 hover:bg-gray-900 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <span className="text-xs font-bold uppercase tracking-[0.15em]">
+                {isLoading ? "Loading..." : "Add To Bag"}
+              </span>
+              <HiOutlineShoppingBag className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={toggleWishlist}
+              className="w-full h-14 rounded-full border border-gray-200 flex items-center justify-center gap-3 hover:border-gray-400 transition-all"
+            >
+              {isWishlisted ? (
+                <HiHeart className="w-4 h-4 text-red-500" />
+              ) : (
+                <HiOutlineHeart className="w-4 h-4 text-gray-400" />
+              )}
+              <span className="text-xs font-medium uppercase tracking-[0.15em] text-gray-600">
+                {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
+              </span>
+            </button>
+          </div>
+
         </div>
       </div>
 
+      {/* Mobile fixed bottom bar */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 px-4 py-3 bg-white/95 backdrop-blur-lg border-t border-gray-100 z-[99] flex gap-3 items-center shadow-lg">
         <div className="flex flex-col justify-center">
           <span className="text-[10px] text-gray-400 uppercase font-bold tracking-tight">

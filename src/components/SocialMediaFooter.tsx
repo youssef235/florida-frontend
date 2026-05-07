@@ -1,27 +1,76 @@
-import { FaFacebookF } from "react-icons/fa6";
-import { FaInstagram } from "react-icons/fa6";
-import { FaTiktok } from "react-icons/fa6";
-import { FaLinkedinIn } from "react-icons/fa6";
-import { FaPinterestP } from "react-icons/fa6";
-import { FaYoutube } from "react-icons/fa6";
-
+import {
+  FaFacebookF,
+  FaInstagram,
+  FaTiktok,
+  FaLinkedinIn,
+  FaPinterestP,
+  FaYoutube,
+} from "react-icons/fa6";
 
 const SocialMediaFooter = () => {
   return (
-    <div className="mx-auto max-w-screen-2xl">
-    <div className="bg-secondaryBrown flex justify-center items-center flex-col py-9 gap-3 mt-24 mx-5 max-[400px]:mx-3">
-      <p className="text-base text-white font-light">Follow us on:</p>
-      <div className="flex gap-2 text-white">
-        <FaFacebookF className="w-3" />
-        <FaInstagram className="w-4" />
-        <FaTiktok className="w-4" />
-        <FaLinkedinIn className="w-4" />
-        <FaPinterestP className="w-4" />
-        <FaYoutube className="w-4" />
+    <div className="w-full mt-24 px-4">
+
+      <div
+        className="
+          max-w-screen-xl mx-auto
+          rounded-3xl
+          bg-white/80
+          backdrop-blur-xl
+          border border-slate-200
+          shadow-[0_20px_60px_rgba(15,23,42,0.08)]
+          py-10
+          flex flex-col items-center gap-6
+        "
+      >
+
+        {/* Title */}
+        <p className="text-sm sm:text-base text-slate-500 font-medium tracking-wide uppercase">
+          Follow us
+        </p>
+
+        {/* Icons */}
+        <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
+
+          {[
+            FaFacebookF,
+            FaInstagram,
+            FaTiktok,
+            FaLinkedinIn,
+            FaPinterestP,
+            FaYoutube,
+          ].map((Icon, i) => (
+            <div
+              key={i}
+              className="
+                w-11 h-11
+                sm:w-12 sm:h-12
+                rounded-full
+                bg-slate-900
+                text-white
+                flex items-center justify-center
+                cursor-pointer
+                transition-all duration-300
+                hover:scale-110
+                hover:bg-black
+                shadow-md
+              "
+            >
+              <Icon size={16} />
+            </div>
+          ))}
+
+        </div>
+
+        {/* Bottom text */}
+        <p className="text-xs text-slate-400 text-center">
+          Stay connected with our latest updates & drops
+        </p>
+
       </div>
-    </div>
 
     </div>
-  )
-}
-export default SocialMediaFooter
+  );
+};
+
+export default SocialMediaFooter;

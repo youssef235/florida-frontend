@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom"; // استيراد الـ Portal
 import toast from "react-hot-toast";
 import {
   HiXMark,
@@ -26,7 +27,6 @@ const SidebarMenu = ({
   const [isAnimating, setIsAnimating] = useState(false);
   const { loginStatus } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
-  const location = useLocation();
 
   const logout = () => {
     toast.success("Logged out successfully");
@@ -70,17 +70,20 @@ const SidebarMenu = ({
     </NavLink>
   );
 
-  return (
+  // استخدام createPortal للتأكد من أن السايد بار فوق كل شيء
+  return createPortal(
     <>
+      {/* Overlay - تم رفع الـ z-index لضمان التغطية */}
       <div
-        className={`fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
           isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setIsSidebarOpen(false)}
       />
 
+      {/* Sidebar Aside - تم رفع الـ z-index ليكون الأعلى إطلاقاُ */}
       <aside
-        className={`fixed top-0 left-0 z-50 w-80 h-full bg-white shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform ${
+        className={`fixed top-0 left-0 z-[9999] w-80 h-full bg-white shadow-2xl transition-transform duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -149,7 +152,8 @@ const SidebarMenu = ({
           </p>
         </div>
       </aside>
-    </>
+    </>,
+    document.body // هذا يخبر React برسم المكون هنا بدلاً من مكانه في الشجرة
   );
 };
 

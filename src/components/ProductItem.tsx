@@ -23,16 +23,34 @@ const ProductItem = ({
   oldPrice,
   variant = "minimal",
 }: ProductItemProps) => {
-  const imgSrc = useImageUrl(image);
+  const { src, status } = useImageUrl(image);
 
   return (
     <div className="group flex flex-col w-full bg-white transition-all duration-300">
       <div className="relative overflow-hidden bg-[#f4f4f4] aspect-[3/4]">
+
+        {/* Skeleton shimmer */}
+        {status === "loading" && (
+          <div className="absolute inset-0 z-10">
+            <div
+              className="w-full h-full"
+              style={{
+                background: "linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%)",
+                backgroundSize: "200% 100%",
+                animation: "shimmer 1.5s infinite",
+              }}
+            />
+          </div>
+        )}
+
         <Link to={`/product/${id}`}>
           <img
-            src={imgSrc}
+            src={src}
             alt={title}
-            className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110"
+            className={`
+              w-full h-full object-cover transition-all duration-[1.5s] ease-out group-hover:scale-110
+              ${status === "loaded" ? "opacity-100" : "opacity-0"}
+            `}
             onError={(e) => {
               (e.target as HTMLImageElement).src = "/assets/placeholder.png";
             }}
@@ -79,11 +97,7 @@ const ProductItem = ({
         </Link>
 
         <div className="flex items-center gap-2 mt-0.5">
-          <span
-            className={`text-[13px] ${
-              hasDiscount ? "text-red-600 font-bold" : "font-semibold text-black"
-            }`}
-          >
+          <span className={`text-[13px] ${hasDiscount ? "text-red-600 font-bold" : "font-semibold text-black"}`}>
             {price.toLocaleString()} EGP
           </span>
           {hasDiscount && oldPrice && (
@@ -95,9 +109,9 @@ const ProductItem = ({
 
         {variant === "detailed" && (
           <div className="flex gap-2 mt-2 pt-2 border-t border-gray-200/50 w-full justify-center">
-            <div className="w-2 h-2 rounded-full bg-[#222] ring-1 ring-offset-2 ring-transparent hover:ring-gray-300 transition-all cursor-pointer"></div>
-            <div className="w-2 h-2 rounded-full bg-[#dcdcdc] ring-1 ring-offset-2 ring-transparent hover:ring-gray-300 transition-all cursor-pointer"></div>
-            <div className="w-2 h-2 rounded-full bg-[#e5d5c5] ring-1 ring-offset-2 ring-transparent hover:ring-gray-300 transition-all cursor-pointer"></div>
+            <div className="w-2 h-2 rounded-full bg-[#222] ring-1 ring-offset-2 ring-transparent hover:ring-gray-300 transition-all cursor-pointer" />
+            <div className="w-2 h-2 rounded-full bg-[#dcdcdc] ring-1 ring-offset-2 ring-transparent hover:ring-gray-300 transition-all cursor-pointer" />
+            <div className="w-2 h-2 rounded-full bg-[#e5d5c5] ring-1 ring-offset-2 ring-transparent hover:ring-gray-300 transition-all cursor-pointer" />
           </div>
         )}
       </div>

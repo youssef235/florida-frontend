@@ -22,21 +22,29 @@
 
 /* تحسين الـ Banners بلمسة ناعمة */
 .banner {
-  height: 80vh; /* يفضل استخدام vh ليكون متجاوب أكثر */
-  min-height: 600px;
+  height: 100svh; /* كامل شاشة الموبايل بالظبط */
+  min-height: unset; /* إلغاء الـ min-height القديم */
   background: linear-gradient(
       to bottom,
       rgba(0, 0, 0, 0.1) 0%,
-      rgba(0, 0, 0, 0.3) 100%
+      rgba(0, 0, 0, 0.5) 100%
     ),
     url("/assets/c2.jpeg") no-repeat;
-  background-size: cover; 
-  background-position: center; 
+  background-size: cover;
+  background-position: center top; /* على الموبايل top أحسن من center */
   display: flex;
-  align-items: center;
+  align-items: flex-end; /* المحتوى تحت زي ما هو */
   justify-content: center;
 }
 
+/* تصغير البانر على الشاشات الكبيرة بس */
+@media (min-width: 640px) {
+  .banner {
+    height: 80vh;
+    min-height: 600px;
+    align-items: center;
+  }
+}
 .shop-banner {
   min-height: 400px; 
   background: linear-gradient(

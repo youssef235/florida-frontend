@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "../components";
 import { checkRegisterFormData } from "../utils/checkRegisterFormData";
 import customFetch from "../axios/custom";
 import toast from "react-hot-toast";
@@ -9,102 +8,190 @@ const Register = () => {
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Get form data
+
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData);
-    // Check if form data is valid
+
     if (!checkRegisterFormData(data)) return;
 
     try {
-      // إرسال طلب التسجيل للباك إند
-      const response = await customFetch.post("/authentication/local/sign-up", {
-        firstName: data.name,      // Mapper: firstName
-        lastName: data.lastname,   // Mapper: lastName
-        email: data.email,
-        password: data.password,
-      });
+      const response = await customFetch.post(
+        "/authentication/local/sign-up",
+        {
+          firstName: data.name,
+          lastName: data.lastname,
+          email: data.email,
+          password: data.password,
+        }
+      );
 
       if (response.status === 201) {
         toast.success("User registered successfully");
         navigate("/login");
       }
     } catch (error: any) {
-      const message = error.response?.data?.message || "Registration failed";
+      const message =
+        error.response?.data?.message || "Registration failed";
+
       toast.error(Array.isArray(message) ? message[0] : message);
     }
   };
 
   return (
-    <div className="max-w-screen-2xl mx-auto pt-24 flex items-center justify-center">
-      <form
-        onSubmit={handleRegister}
-        className="max-w-5xl mx-auto flex flex-col gap-5 max-sm:gap-3 items-center justify-center max-sm:px-5"
-      >
-        <h2 className="text-5xl text-center mb-5 font-thin max-md:text-4xl max-sm:text-3xl max-[450px]:text-xl max-[450px]:font-normal">
-          Welcome! Register here:
-        </h2>
-        <div className="flex flex-col gap-2 w-full">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="name">Your name</label>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4">
+
+      <div className="w-full max-w-md">
+
+        {/* CARD */}
+        <div
+          className="
+            w-full
+            bg-white/80
+            backdrop-blur-xl
+            border border-slate-200
+            shadow-[0_20px_60px_rgba(15,23,42,0.12)]
+            rounded-3xl
+            p-6 sm:p-8
+          "
+        >
+
+          {/* HEADER */}
+          <div className="text-center mb-8">
+
+            <h2 className="text-3xl sm:text-4xl font-semibold text-slate-900">
+              Create Account
+            </h2>
+
+            <p className="text-slate-500 mt-2 text-sm sm:text-base">
+              Join us and start shopping
+            </p>
+
+          </div>
+
+          {/* FORM */}
+          <form onSubmit={handleRegister} className="flex flex-col gap-4">
+
+            {/* Name */}
             <input
               type="text"
-              className="bg-white border border-black text-xl py-2 px-3 w-full outline-none max-[450px]:text-base"
-              placeholder="Enter name"
-              id="name"
               name="name"
+              placeholder="First name"
+              className="
+                h-12 px-4 rounded-xl
+                border border-slate-200
+                bg-slate-50
+                outline-none
+                focus:bg-white
+                focus:border-slate-400
+                transition
+              "
             />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="lastname">Your lastname</label>
+
+            {/* Lastname */}
             <input
               type="text"
-              className="bg-white border border-black text-xl py-2 px-3 w-full outline-none max-[450px]:text-base"
-              placeholder="Enter lastname"
-              id="lastname"
               name="lastname"
+              placeholder="Last name"
+              className="
+                h-12 px-4 rounded-xl
+                border border-slate-200
+                bg-slate-50
+                outline-none
+                focus:bg-white
+                focus:border-slate-400
+                transition
+              "
             />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email">Your email</label>
+
+            {/* Email */}
             <input
               type="email"
-              className="bg-white border border-black text-xl py-2 px-3 w-full outline-none max-[450px]:text-base"
-              placeholder="Enter email address"
-              id="email"
               name="email"
+              placeholder="Email address"
+              className="
+                h-12 px-4 rounded-xl
+                border border-slate-200
+                bg-slate-50
+                outline-none
+                focus:bg-white
+                focus:border-slate-400
+                transition
+              "
             />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="password">Your password</label>
+
+            {/* Password */}
             <input
               type="password"
-              className="bg-white border border-black text-xl py-2 px-3 w-full outline-none max-[450px]:text-base"
-              placeholder="Enter password"
-              id="password"
               name="password"
+              placeholder="Password"
+              className="
+                h-12 px-4 rounded-xl
+                border border-slate-200
+                bg-slate-50
+                outline-none
+                focus:bg-white
+                focus:border-slate-400
+                transition
+              "
             />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="confirmPassword">Confirm password</label>
+
+            {/* Confirm Password */}
             <input
               type="password"
-              className="bg-white border border-black text-xl py-2 px-3 w-full outline-none max-[450px]:text-base"
-              placeholder="Confirm password"
-              id="confirmPassword"
               name="confirmPassword"
+              placeholder="Confirm password"
+              className="
+                h-12 px-4 rounded-xl
+                border border-slate-200
+                bg-slate-50
+                outline-none
+                focus:bg-white
+                focus:border-slate-400
+                transition
+              "
             />
+
+            {/* Button */}
+            <button
+              type="submit"
+              className="
+                mt-2
+                h-12
+                rounded-xl
+                bg-slate-900
+                hover:bg-black
+                text-white
+                font-semibold
+                transition
+                active:scale-[0.98]
+                shadow-lg
+                shadow-slate-900/20
+              "
+            >
+              Create Account
+            </button>
+
+          </form>
+
+          {/* FOOTER */}
+          <div className="text-center mt-6 text-sm text-slate-500">
+
+            Already have an account?{" "}
+
+            <Link
+              to="/login"
+              className="text-slate-900 font-semibold hover:underline"
+            >
+              Login
+            </Link>
+
           </div>
+
         </div>
-        <Button type="submit" text="Register" mode="brown" />
-        <Link
-          to="/login"
-          className="text-xl max-md:text-lg max-[450px]:text-sm"
-        >
-          Already have an account?{" "}
-          <span className="text-secondaryBrown">Login now</span>.
-        </Link>
-      </form>
+
+      </div>
     </div>
   );
 };
+
 export default Register;

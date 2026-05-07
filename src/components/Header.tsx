@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 const Header = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { loginStatus } = useAppSelector((state) => state.auth);
+  const { productsInCart } = useAppSelector((state) => state.cart);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -26,11 +27,9 @@ const Header = () => {
 
   return (
     <>
-      {/* الـ Header ثابت (Sticky) مع خلفية شفافة مموهة لإعطاء مظهر عصري */}
       <header className="sticky top-0 z-50 w-full bg-white/70 backdrop-blur-lg border-b border-gray-100">
         <div className="max-w-screen-2xl mx-auto flex justify-between items-center py-4 px-6">
           
-          {/* القائمة الجانبية - Left Section */}
           <div className="flex-1">
             <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -40,7 +39,6 @@ const Header = () => {
             </button>
           </div>
 
-          {/* اللوجو - Center Section */}
           <div className="flex-[2] text-center">
             <Link 
               to="/" 
@@ -51,12 +49,10 @@ const Header = () => {
             </Link>
           </div>
 
-          {/* الأيقونات - Right Section */}
           <div className="flex-1 flex gap-2 md:gap-4 items-center justify-end">
             <Link 
               to="/search" 
               className="p-2 hover:text-blue-600 transition-colors"
-              title="Search"
             >
               <HiOutlineMagnifyingGlass className="text-2xl" />
             </Link>
@@ -64,8 +60,7 @@ const Header = () => {
             {loginStatus ? (
               <button 
                 onClick={handleLogout} 
-                className="p-2 hover:text-red-600 transition-colors" 
-                title="Logout"
+                className="p-2 hover:text-red-600 transition-colors"
               >
                 <HiOutlineArrowRightOnRectangle className="text-2xl" />
               </button>
@@ -73,7 +68,6 @@ const Header = () => {
               <Link 
                 to="/login" 
                 className="p-2 hover:text-blue-600 transition-colors"
-                title="Account"
               >
                 <HiOutlineUser className="text-2xl" />
               </Link>
@@ -82,13 +76,13 @@ const Header = () => {
             <Link 
               to="/cart" 
               className="p-2 relative hover:scale-110 transition-transform"
-              title="Cart"
             >
               <HiOutlineShoppingBag className="text-2xl" />
-              {/* Badge بسيط فوق السلة */}
-              <span className="absolute top-1 right-1 bg-black text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-                0
-              </span>
+              {productsInCart.length > 0 && (
+                <span className="absolute top-1 right-1 bg-black text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                  {productsInCart.length}
+                </span>
+              )}
             </Link>
           </div>
         </div>

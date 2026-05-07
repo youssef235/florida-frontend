@@ -11,9 +11,9 @@ const ShopBanner = ({ category }: { category: string }) => {
           New Collection 2026
         </span>
         <h2 className="text-5xl md:text-7xl font-serif italic text-white leading-tight">
-          {category && category !== "all"
-            ? formatCategoryName(category)
-            : "The Gallery"}
+          {
+        
+          "The Gallery"}
         </h2>
         <div className="h-[1px] w-12 bg-white/30 mt-6" />
       </div>

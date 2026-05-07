@@ -21,59 +21,54 @@ type WishlistState = {
 const getUserId = () => {
   try {
     const user = JSON.parse(localStorage.getItem("user") || "null");
-    return user?.id || null;
+    return user?._id || null;  // ✅ _id مش id
   } catch {
     return null;
   }
 };
 
-export const fetchWishlist = createAsyncThunk<
-  ProductType[],
-  void,
-  { rejectValue: string }
->("wishlist/fetchWishlist", async (_, { rejectWithValue }) => {
-  try {
-    const userId = getUserId();
-    if (!userId) return rejectWithValue("User not found in localStorage");
-
-    const res = await customFetch.get(`/wishlist/${userId}`);
-    return res.data;
-  } catch (error: any) {
-    return rejectWithValue(error?.response?.data?.message || "Failed to fetch wishlist");
+export const fetchWishlist = createAsyncThunk<ProductType[], void, { rejectValue: string }>(
+  "wishlist/fetchWishlist",
+  async (_, { rejectWithValue }) => {
+    try {
+      const userId = getUserId();
+      if (!userId) return rejectWithValue("User not found in localStorage");
+      const res = await customFetch.get(`/wishlist/${userId}`);
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data?.message || "Failed to fetch wishlist");
+    }
   }
-});
+);
 
-export const addToWishlist = createAsyncThunk<
-  { productId: string; message: string },
-  string,
-  { rejectValue: string }
->("wishlist/addToWishlist", async (productId, { rejectWithValue }) => {
-  try {
-    const userId = getUserId();
-    if (!userId) return rejectWithValue("User not found in localStorage");
-
-    const res = await customFetch.post(`/wishlist/${userId}`, { productId });
-    return { productId, message: res.data.message };
-  } catch (error: any) {
-    return rejectWithValue(error?.response?.data?.message || "Failed to add to wishlist");
+export const addToWishlist = createAsyncThunk<ProductType, string, { rejectValue: string }>(
+  "wishlist/addToWishlist",
+  async (productId, { rejectWithValue }) => {
+    try {
+      const userId = getUserId();
+      if (!userId) return rejectWithValue("User not found in localStorage");
+      await customFetch.post(`/wishlist/${userId}`, { productId });
+      const res = await customFetch.get(`/products/${productId}`);
+      return res.data as ProductType;
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data?.message || "Failed to add to wishlist");
+    }
   }
-});
+);
 
-export const removeFromWishlist = createAsyncThunk<
-  { productId: string; message: string },
-  string,
-  { rejectValue: string }
->("wishlist/removeFromWishlist", async (productId, { rejectWithValue }) => {
-  try {
-    const userId = getUserId();
-    if (!userId) return rejectWithValue("User not found in localStorage");
-
-    const res = await customFetch.delete(`/wishlist/${userId}/${productId}`);
-    return { productId, message: res.data.message };
-  } catch (error: any) {
-    return rejectWithValue(error?.response?.data?.message || "Failed to remove from wishlist");
+export const removeFromWishlist = createAsyncThunk<{ productId: string; message: string }, string, { rejectValue: string }>(
+  "wishlist/removeFromWishlist",
+  async (productId, { rejectWithValue }) => {
+    try {
+      const userId = getUserId();
+      if (!userId) return rejectWithValue("User not found in localStorage");
+      const res = await customFetch.delete(`/wishlist/${userId}/${productId}`);
+      return { productId, message: res.data.message };
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.data?.message || "Failed to remove from wishlist");
+    }
   }
-});
+);
 
 const initialState: WishlistState = {
   items: [],
@@ -105,14 +100,23 @@ const wishlistSlice = createSlice({
         state.loading = false;
         state.error = action.payload || "Failed to fetch wishlist";
       })
-      .addCase(addToWishlist.fulfilled, (state, action) => {
-        const exists = state.items.some((item) => item.id === action.payload.productId);
+      .addCase(addToWishlist.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(addToWishlist.fulfilled, (state, action: PayloadAction<ProductType>) => {
+        const exists = state.items.some((item) => item.id === action.payload.id);
         if (!exists) {
-          state.items.push({ id: action.payload.productId, name: "" });
+          state.items.push(action.payload);
         }
+      })
+      .addCase(addToWishlist.rejected, (state, action) => {
+        state.error = action.payload || "Failed to add to wishlist";
       })
       .addCase(removeFromWishlist.fulfilled, (state, action) => {
         state.items = state.items.filter((item) => item.id !== action.payload.productId);
+      })
+      .addCase(removeFromWishlist.rejected, (state, action) => {
+        state.error = action.payload || "Failed to remove from wishlist";
       });
   },
 });
