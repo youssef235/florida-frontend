@@ -1,5 +1,26 @@
 import { LoaderFunctionArgs, useLoaderData, redirect, Link } from "react-router-dom";
 import customFetch from "../axios/custom";
+import { useImageUrl } from "../hooks/useImageUrl";
+
+/**
+ * مكون فرعي لعرض صورة المنتج باستخدام الـ Hook
+ * لضمان تخطي مشاكل الـ Blobs و ngrok على الموبايل
+ */
+const OrderProductImage = ({ imagePath, alt }: { imagePath: string; alt: string }) => {
+  const { src, status } = useImageUrl(imagePath);
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className="so-product-img"
+      style={{
+        opacity: status === "loaded" ? 1 : 0.6,
+        transition: "opacity 0.3s ease",
+      }}
+    />
+  );
+};
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   try {
@@ -17,14 +38,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     return redirect("/order-history");
   }
 };
-const getCleanImageUrl = (imagePath: string): string => {
-  if (!imagePath) return "";
-  // إزالة السلاش من نهاية الـ baseURL إن وجد
-  const baseUrl = customFetch.defaults.baseURL?.replace(/\/+$/, "") || "";
-  // التأكد من أن المسار يبدأ بسلاش واحد
-  const cleanPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
-  return `${baseUrl}${cleanPath}`;
-};
+
 const statusMap: Record<number, { label: string; color: string }> = {
   0: { label: "Processing", color: "#F59E0B" },
   1: { label: "Shipped",    color: "#3B82F6" },
@@ -53,7 +67,6 @@ const SingleOrderHistory = () => {
         .so-dark-card { background:#0D0D0D; border-radius:20px; padding:2rem; color:#fff; }
         .so-section-title { font-family:'Syne',sans-serif; font-size:0.75rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#AAA; margin-bottom:1.25rem; }
         .so-row { display:flex; justify-content:space-between; font-size:0.88rem; color:#888; margin-bottom:0.6rem; }
-        .so-row-val { color:#0D0D0D; font-weight:500; }
         .so-divider { border:none; border-top:1px solid rgba(0,0,0,0.07); margin:1.25rem 0; }
         .so-badge { display:inline-flex; align-items:center; gap:0.35rem; padding:0.3rem 0.75rem; border-radius:50px; font-size:0.72rem; font-weight:600; }
         .so-back { font-family:'Syne',sans-serif; font-size:0.78rem; font-weight:700; color:#999; text-decoration:none; letter-spacing:0.06em; text-transform:uppercase; transition:color 0.2s; }
@@ -61,17 +74,23 @@ const SingleOrderHistory = () => {
         .so-th { font-family:'Syne',sans-serif; font-size:0.68rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#AAA; padding:0.75rem 0; border-bottom:1px solid rgba(0,0,0,0.07); text-align:left; }
         .so-td { padding:1rem 0; font-size:0.88rem; color:#444; border-bottom:1px solid rgba(0,0,0,0.04); vertical-align:middle; }
         .so-product-img { width:48px; height:48px; border-radius:8px; object-fit:cover; background:#F2F0ED; }
+        
+        @media (max-width: 768px) {
+          .so-grid-layout { grid-template-columns: 1fr !important; }
+          .so-hide-mobile { display: none; }
+          .so-td { font-size: 0.8rem; }
+        }
       `}</style>
 
       <div className="so-root">
         <div style={{ maxWidth: 900, margin: "0 auto", padding: "3rem 1.5rem" }}>
 
-          {/* Back */}
+          {/* Back Button */}
           <Link to="/order-history" className="so-back" style={{ display: "inline-block", marginBottom: "1.5rem" }}>
             ← Back to Orders
           </Link>
 
-          {/* Header */}
+          {/* Header Section */}
           <div style={{ marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
             <div>
               <div className="so-title">Order Details</div>
@@ -79,24 +98,24 @@ const SingleOrderHistory = () => {
                 #{order?._id?.toUpperCase()}
               </div>
             </div>
-            <span className="so-badge" style={{ background: status.color + "18", color: status.color, alignSelf: "flex-start" }}>
+            <span className="so-badge" style={{ background: status.color + "18", color: status.color }}>
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: status.color, display: "inline-block" }} />
               {status.label}
             </span>
           </div>
 
-          <div style={{ display: "grid", gap: "1.5rem" }} className="lg:grid lg:grid-cols-3 lg:gap-6">
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "1.5rem" }} className="so-grid-layout">
 
-            {/* Items — col span 2 */}
-            <div className="lg:col-span-2" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            {/* Left Column: Items & Address */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               <div className="so-card">
                 <div className="so-section-title">Order Items</div>
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
                     <tr>
-                      <th className="so-th" style={{ width: "40%" }}>Product</th>
+                      <th className="so-th" style={{ width: "45%" }}>Product</th>
                       <th className="so-th" style={{ textAlign: "center" }}>Qty</th>
-                      <th className="so-th" style={{ textAlign: "right" }}>Price</th>
+                      <th className="so-th so-hide-mobile" style={{ textAlign: "right" }}>Price</th>
                       <th className="so-th" style={{ textAlign: "right" }}>Total</th>
                     </tr>
                   </thead>
@@ -105,11 +124,11 @@ const SingleOrderHistory = () => {
                       <tr key={item._id}>
                         <td className="so-td">
                           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                          <img
-  src={getCleanImageUrl(item.product?.images?.[0] || "")}
-  alt={item.product?.name}
-  className="so-product-img"
-/>
+                            {/* استخدام المكون الجديد المعالج للصور هنا */}
+                            <OrderProductImage 
+                              imagePath={item.product?.images?.[0] || ""} 
+                              alt={item.product?.name || "product"} 
+                            />
                             <div>
                               <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 600, fontSize: "0.85rem", color: "#0D0D0D" }}>
                                 {item.product?.name}
@@ -121,7 +140,7 @@ const SingleOrderHistory = () => {
                           </div>
                         </td>
                         <td className="so-td" style={{ textAlign: "center" }}>{item.quantity}</td>
-                        <td className="so-td" style={{ textAlign: "right" }}>EGP {Number(item.price).toFixed(0)}</td>
+                        <td className="so-td so-hide-mobile" style={{ textAlign: "right" }}>EGP {Number(item.price).toFixed(0)}</td>
                         <td className="so-td" style={{ textAlign: "right", fontFamily: "Syne, sans-serif", fontWeight: 700, color: "#0D0D0D" }}>
                           EGP {(Number(item.price) * item.quantity).toFixed(0)}
                         </td>
@@ -131,7 +150,6 @@ const SingleOrderHistory = () => {
                 </table>
               </div>
 
-              {/* Delivery Info */}
               {order?.deliveryInfo && (
                 <div className="so-card">
                   <div className="so-section-title">Delivery Address</div>
@@ -148,8 +166,8 @@ const SingleOrderHistory = () => {
               )}
             </div>
 
-            {/* Summary */}
-            <div>
+            {/* Right Column: Summary */}
+            <div style={{ position: "sticky", top: "2rem", height: "fit-content" }}>
               <div className="so-dark-card">
                 <div style={{ fontFamily: "Syne, sans-serif", fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)", marginBottom: "1.25rem" }}>
                   Order Summary
