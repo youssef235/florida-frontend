@@ -9,8 +9,7 @@ import {
 
 const SocialMediaFooter = () => {
   return (
-    <div className="w-full mt-24 px-4">
-
+<div className="w-full mt-10 sm:mt-1 px-4">
       <div
         className="
           max-w-screen-xl mx-auto

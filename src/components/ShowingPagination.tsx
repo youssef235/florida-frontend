@@ -12,25 +12,70 @@ const ShowingPagination = ({
   category: string;
   setCurrentPage: (page: number) => void;
 }) => {
-  const { totalProducts, showingProducts } = useAppSelector(state => state.shop);
+  const { totalProducts, showingProducts } = useAppSelector(
+    (state) => state.shop
+  );
+
   const navigate = useNavigate();
+
   return (
-    <div className="px-5 max-[400px]:px-3 mt-12 mb-24">
-      <div className="flex flex-col gap-6 justify-center items-center w-1/2 mx-auto max-sm:w-3/4 max-sm:gap-5">
-        <p className="text-xl max-sm:text-lg">Showing { showingProducts } of { totalProducts }</p>
+    <div className="px-4 sm:px-5 mt-10 sm:mt-14 mb-16 sm:mb-24">
+
+      <div className="
+        flex flex-col
+        gap-5 sm:gap-6
+        justify-center items-center
+        w-full sm:w-3/4 md:w-1/2
+        mx-auto
+        text-center
+      ">
+
+        {/* Counter */}
+        <p className="
+          text-sm sm:text-base md:text-lg
+          text-gray-600
+          font-medium
+        ">
+          Showing{" "}
+          <span className="text-black font-semibold">
+            {showingProducts}
+          </span>{" "}
+          of{" "}
+          <span className="text-black font-semibold">
+            {totalProducts}
+          </span>
+        </p>
+
+        {/* Button */}
         <Button
           text="View More"
           mode="white"
           onClick={() => {
             setCurrentPage(page + 1);
-            navigate(`/shop${category ? `/${category}` : ""}?page=${page + 1}`);
+            navigate(
+              `/shop${category ? `/${category}` : ""}?page=${page + 1}`
+            );
           }}
         />
-        <a href="#gridTop" className="flex justify-center items-center text-xl gap-2 max-sm:text-lg">
-          Back to Top <HiChevronUp />
+
+        {/* Back to top */}
+        <a
+          href="#gridTop"
+          className="
+            flex items-center gap-2
+            text-sm sm:text-base
+            text-gray-500
+            hover:text-black
+            transition
+          "
+        >
+          Back to Top
+          <HiChevronUp className="text-lg" />
         </a>
+
       </div>
     </div>
   );
 };
+
 export default ShowingPagination;

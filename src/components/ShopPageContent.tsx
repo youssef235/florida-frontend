@@ -129,8 +129,7 @@ const response = await customFetch.get("/categories");
         </div>
 
         {/* 3. الترقيم (Pagination) */}
-        <div className="mt-16 mb-20 py-10 border-t border-gray-100 flex justify-center">
-          <ShowingPagination
+<div className="mt-8 md:mt-12 mb-10 md:mb-16 py-4 md:py-6 border-t border-gray-100 flex justify-center">          <ShowingPagination
             page={currentPage}
             category={activeCategory}
             setCurrentPage={setCurrentPage}
