@@ -25,7 +25,12 @@ const statusMap: Record<number, { label: string; color: string }> = {
   2: { label: "Delivered", color: "#10B981" },
   3: { label: "Cancelled", color: "#EF4444" },
 };
-
+const getCleanImageUrl = (imagePath: string): string => {
+  if (!imagePath) return "";
+  const baseUrl = customFetch.defaults.baseURL?.replace(/\/+$/, "") || "";
+  const cleanPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+  return `${baseUrl}${cleanPath}`;
+};
 const OrderHistory = () => {
   const orders = useLoaderData() as any[];
 

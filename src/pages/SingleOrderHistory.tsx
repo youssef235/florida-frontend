@@ -6,18 +6,25 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     const token = localStorage.getItem("token");
     if (!token) return redirect("/login");
 
-    // ✅ جيب كل الأوردرات وابحث عن الـ id المطلوب
-    const response = await customFetch.get("/orders");
-    const orders = response.data ?? [];
-    const order = orders.find((o: any) => o._id === params.id);
+    // جلب الأوردر المحدد فقط باستخدام الـ ID من السيرفر مباشرة
+    const response = await customFetch.get(`/orders/${params.id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-    if (!order) return redirect("/order-history");
-    return order;
-  } catch {
-    return redirect("/login");
+    return response.data;
+  } catch (error) {
+    // إذا لم يجد الأوردر أو حدث خطأ ارجع للقائمة
+    return redirect("/order-history");
   }
 };
-
+const getCleanImageUrl = (imagePath: string): string => {
+  if (!imagePath) return "";
+  // إزالة السلاش من نهاية الـ baseURL إن وجد
+  const baseUrl = customFetch.defaults.baseURL?.replace(/\/+$/, "") || "";
+  // التأكد من أن المسار يبدأ بسلاش واحد
+  const cleanPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+  return `${baseUrl}${cleanPath}`;
+};
 const statusMap: Record<number, { label: string; color: string }> = {
   0: { label: "Processing", color: "#F59E0B" },
   1: { label: "Shipped",    color: "#3B82F6" },
@@ -98,11 +105,11 @@ const SingleOrderHistory = () => {
                       <tr key={item._id}>
                         <td className="so-td">
                           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                            <img
-                              src={`https://embezzle-phoenix-swinging.ngrok-free.dev${item.product?.images?.[0]}`}
-                              alt={item.product?.name}
-                              className="so-product-img"
-                            />
+                          <img
+  src={getCleanImageUrl(item.product?.images?.[0] || "")}
+  alt={item.product?.name}
+  className="so-product-img"
+/>
                             <div>
                               <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 600, fontSize: "0.85rem", color: "#0D0D0D" }}>
                                 {item.product?.name}

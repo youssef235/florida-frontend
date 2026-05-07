@@ -7,6 +7,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../hooks";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+
 import {
   removeProductFromTheCart,
   updateProductQuantity,
@@ -15,6 +16,17 @@ import {
 } from "../features/cart/cartSlice";
 import { useEffect } from "react";
 import customFetch from "../axios/custom";
+
+
+const getCleanImageUrl = (imagePath: string) => {
+  const baseUrl = customFetch.defaults.baseURL?.endsWith('/') 
+    ? customFetch.defaults.baseURL.slice(0, -1) 
+    : customFetch.defaults.baseURL;
+
+  const cleanPath = imagePath?.startsWith('/') ? imagePath : `/${imagePath}`;
+  return `${baseUrl}${cleanPath}`;
+};
+
 
 const Cart = () => {
   const dispatch = useAppDispatch();
@@ -585,8 +597,7 @@ const Cart = () => {
                   {/* Image */}
                   <div className="c-item-img">
                     <img
-                      src={`${customFetch.defaults.baseURL}${product.image}`}
-                      alt={product.title}
+src={getCleanImageUrl(product.image ?? "")}                      alt={product.title}
                     />
                   </div>
 
