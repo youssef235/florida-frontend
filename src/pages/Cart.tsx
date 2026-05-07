@@ -7,6 +7,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../hooks";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useEffect } from "react";
 
 import {
   removeProductFromTheCart,
@@ -14,19 +15,31 @@ import {
   syncCart,
   loadCart,
 } from "../features/cart/cartSlice";
-import { useEffect } from "react";
-import customFetch from "../axios/custom";
+import { useImageUrl } from "../hooks/useImageUrl";
 
+/**
+ * مكون فرعي مخصص لعرض صورة المنتج داخل السلة
+ * يستخدم الـ useImageUrl لضمان تخطي حواجز ngrok/blobs
+ */
+const CartItemImage = ({ imagePath, title }: { imagePath: string; title: string }) => {
+  const { src, status } = useImageUrl(imagePath);
 
-const getCleanImageUrl = (imagePath: string) => {
-  const baseUrl = customFetch.defaults.baseURL?.endsWith('/') 
-    ? customFetch.defaults.baseURL.slice(0, -1) 
-    : customFetch.defaults.baseURL;
-
-  const cleanPath = imagePath?.startsWith('/') ? imagePath : `/${imagePath}`;
-  return `${baseUrl}${cleanPath}`;
+  return (
+    <div className="c-item-img">
+      <img
+        src={src}
+        alt={title}
+        style={{
+          opacity: status === "loaded" ? 1 : 0.5,
+          transition: "opacity 0.4s ease-in-out",
+        }}
+        onError={(e) => {
+          (e.target as HTMLImageElement).src = "/assets/placeholder.png";
+        }}
+      />
+    </div>
+  );
 };
-
 
 const Cart = () => {
   const dispatch = useAppDispatch();
@@ -81,13 +94,7 @@ const Cart = () => {
           --success: #10b981;
         }
 
-        * {
-          box-sizing: border-box;
-        }
-
-        body {
-          background: var(--bg);
-        }
+        * { box-sizing: border-box; }
 
         .c-root {
           font-family: 'Inter', sans-serif;
@@ -95,8 +102,6 @@ const Cart = () => {
           min-height: 100vh;
           color: var(--text);
         }
-
-        /* HEADER */
 
         .c-header {
           max-width: 1250px;
@@ -121,9 +126,7 @@ const Cart = () => {
           gap: 0.5rem;
         }
 
-        .c-title span.text-accent {
-          color: #475569;
-        }
+        .c-title span.text-accent { color: #475569; }
 
         .c-back {
           text-decoration: none;
@@ -131,12 +134,6 @@ const Cart = () => {
           font-size: 0.9rem;
           font-weight: 500;
           transition: 0.25s ease;
-          white-space: nowrap;
-        }
-
-        .c-back:hover {
-          color: var(--text);
-          transform: translateX(-2px);
         }
 
         .c-count {
@@ -152,8 +149,6 @@ const Cart = () => {
           font-weight: 600;
         }
 
-        /* BODY */
-
         .c-body {
           max-width: 1250px;
           margin: 0 auto;
@@ -164,13 +159,8 @@ const Cart = () => {
         }
 
         @media (min-width: 1100px) {
-          .c-body {
-            grid-template-columns: minmax(0, 1fr) 380px;
-            align-items: start;
-          }
+          .c-body { grid-template-columns: minmax(0, 1fr) 380px; align-items: start; }
         }
-
-        /* ITEM */
 
         .c-item {
           display: grid;
@@ -182,94 +172,42 @@ const Cart = () => {
           padding: 1.2rem;
           margin-bottom: 1rem;
           transition: 0.3s ease;
-          backdrop-filter: blur(10px);
           box-shadow: var(--shadow);
-        }
-
-        .c-item:hover {
-          transform: translateY(-4px);
-          box-shadow: var(--shadow-hover);
-        }
-
-        @media (max-width: 640px) {
-          .c-item {
-            grid-template-columns: 1fr;
-          }
         }
 
         .c-item-img {
           width: 100%;
-          aspect-ratio: 3/4;
+          aspect-ratio: 1/1;
           border-radius: 18px;
           overflow: hidden;
           background: #f1f5f9;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .c-item-img img {
           width: 100%;
           height: 100%;
-          object-fit: cover;
-          transition: transform 0.5s ease;
+          object-fit: contain; /* مهم لعدم قص المنتجات */
         }
 
-        .c-item:hover .c-item-img img {
-          transform: scale(1.05);
-        }
+        .c-item-info { display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; }
 
-        .c-item-info {
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          gap: 1rem;
-        }
-
-        .c-item-top {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 1rem;
-        }
+        .c-item-top { display: flex; justify-content: space-between; gap: 1rem; }
 
         .c-item-name {
           text-decoration: none;
           color: var(--text);
           font-size: 1.05rem;
           font-weight: 700;
-          line-height: 1.5;
-          transition: 0.2s ease;
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
 
-        .c-item-name:hover {
-          color: #334155;
-        }
-
-        .c-item-meta {
-          margin-top: 0.5rem;
-          color: var(--muted);
-          font-size: 0.82rem;
-          font-weight: 500;
-        }
-
-        .c-item-price {
-          font-size: 1.2rem;
-          font-weight: 700;
-          color: var(--text);
-          white-space: nowrap;
-        }
-
-        .c-item-bottom {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 1rem;
-          flex-wrap: wrap;
-        }
-
-        /* QTY */
+        .c-item-price { font-size: 1.2rem; font-weight: 700; color: var(--text); }
 
         .c-qty {
           display: inline-flex;
@@ -281,37 +219,18 @@ const Cart = () => {
         }
 
         .c-qty-btn {
-          width: 34px;
-          height: 34px;
+          width: 32px;
+          height: 32px;
           border: none;
           background: transparent;
-          border-radius: 50%;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: 0.2s ease;
-          color: var(--text);
+          border-radius: 50%;
         }
 
-        .c-qty-btn:hover:not(:disabled) {
-          background: var(--primary);
-          color: white;
-        }
-
-        .c-qty-btn:disabled {
-          opacity: 0.4;
-          cursor: not-allowed;
-        }
-
-        .c-qty-val {
-          min-width: 32px;
-          text-align: center;
-          font-weight: 700;
-          font-size: 0.95rem;
-        }
-
-        /* REMOVE */
+        .c-qty-btn:hover:not(:disabled) { background: var(--primary); color: white; }
 
         .c-remove {
           border: none;
@@ -321,424 +240,161 @@ const Cart = () => {
           align-items: center;
           gap: 0.35rem;
           cursor: pointer;
-          font-size: 0.82rem;
           font-weight: 600;
-          transition: 0.2s ease;
-          padding: 0.55rem 0.8rem;
-          border-radius: 10px;
+          font-size: 0.82rem;
         }
-
-        .c-remove:hover:not(:disabled) {
-          background: rgba(239,68,68,0.08);
-          color: var(--danger);
-        }
-
-        /* SUMMARY */
 
         .c-summary {
           background: rgba(255,255,255,0.9);
-          border: 1px solid rgba(226,232,240,0.9);
+          border: 1px solid var(--border);
           border-radius: 28px;
           padding: 2rem;
           position: sticky;
           top: 1.5rem;
           box-shadow: var(--shadow);
-          backdrop-filter: blur(14px);
         }
-
-        .c-summary-title {
-          font-size: 1.6rem;
-          font-weight: 700;
-          margin-bottom: 1.7rem;
-          color: var(--text);
-        }
-
-        .c-free-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.5rem;
-          background: rgba(16,185,129,0.08);
-          color: var(--success);
-          padding: 0.7rem 1rem;
-          border-radius: 999px;
-          font-size: 0.8rem;
-          font-weight: 600;
-          margin-bottom: 1.5rem;
-        }
-
-        .c-free-dot {
-          width: 8px;
-          height: 8px;
-          background: var(--success);
-          border-radius: 50%;
-        }
-
-        .c-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1rem;
-          color: var(--muted);
-          font-size: 0.95rem;
-        }
-
-        .c-row-val {
-          color: var(--text);
-          font-weight: 600;
-        }
-
-        .c-row-val.free {
-          color: var(--success);
-        }
-
-        .c-divider {
-          border: none;
-          border-top: 1px solid var(--border);
-          margin: 1.5rem 0;
-        }
-
-        .c-total-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1.5rem;
-        }
-
-        .c-total-label {
-          font-size: 1rem;
-          font-weight: 600;
-          color: var(--muted);
-        }
-
-        .c-total-val {
-          font-size: 2rem;
-          font-weight: 800;
-          color: var(--text);
-        }
-
-        /* BUTTON */
 
         .c-checkout {
           width: 100%;
-          border: none;
           background: var(--primary);
           color: white;
           text-decoration: none;
           border-radius: 18px;
-          padding: 1rem 1.2rem;
+          padding: 1rem;
           display: flex;
           align-items: center;
           justify-content: space-between;
           font-weight: 700;
-          transition: 0.25s ease;
-          box-shadow: 0 10px 30px rgba(17,24,39,0.16);
         }
 
-        .c-checkout:hover {
-          background: var(--primary-hover);
-          transform: translateY(-2px);
-        }
-
-        .c-checkout-arrow {
-          width: 38px;
-          height: 38px;
-          border-radius: 50%;
-          background: rgba(255,255,255,0.14);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: 0.3s ease;
-        }
-
-        .c-checkout:hover .c-checkout-arrow {
-          transform: translateX(4px);
-        }
-
-        .c-secure {
-          margin-top: 1rem;
-          text-align: center;
-          font-size: 0.8rem;
-          color: var(--muted);
-        }
-
-        /* EMPTY */
-
-        .c-empty {
-          background: rgba(255,255,255,0.92);
-          border: 1px solid rgba(226,232,240,0.8);
-          border-radius: 28px;
-          padding: 5rem 2rem;
-          text-align: center;
-          box-shadow: var(--shadow);
-        }
-
-        .c-empty-icon {
-          width: 90px;
-          height: 90px;
-          margin: 0 auto 1.5rem;
-          border-radius: 50%;
-          background: #f8fafc;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--muted);
-        }
-
-        .c-empty-title {
-          font-size: 1.7rem;
-          font-weight: 700;
-          margin-bottom: 0.5rem;
-          color: var(--text);
-        }
-
-        .c-empty-sub {
-          color: var(--muted);
-          font-size: 0.95rem;
-        }
-
-        /* LOADING */
-
-        .c-loading {
-          padding: 5rem 0;
-          text-align: center;
-        }
-
-        .c-spinner {
-          width: 42px;
-          height: 42px;
-          border: 3px solid #e2e8f0;
-          border-top-color: var(--primary);
-          border-radius: 50%;
-          margin: 0 auto;
-          animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        .c-loading-text {
-          margin-top: 1rem;
-          color: var(--muted);
-          font-size: 0.9rem;
-        }
-
-        @media (max-width: 1100px) {
-          .c-summary {
-            position: static;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .c-header {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-
-          .c-summary {
-            padding: 1.5rem;
-          }
-
-          .c-total-val {
-            font-size: 1.6rem;
-          }
+        @media (max-width: 640px) {
+          .c-item { grid-template-columns: 80px 1fr; gap: 1rem; padding: 1rem; }
+          .c-item-name { font-size: 0.95rem; }
+          .c-item-price { font-size: 1rem; }
         }
       `}</style>
 
       <div className="c-root">
-
-        {/* Header */}
         <header className="c-header">
-          <div>
-            <h1 className="c-title">
-              Shopping <span className="text-accent">Bag</span>
-
-              {productsInCart.length > 0 && (
-                <span className="c-count">{productsInCart.length}</span>
-              )}
-            </h1>
-          </div>
-
-          <Link to="/" className="c-back">
-            ← Continue Shopping
-          </Link>
+          <h1 className="c-title">
+            Shopping <span className="text-accent">Bag</span>
+            {productsInCart.length > 0 && (
+              <span className="c-count">{productsInCart.length}</span>
+            )}
+          </h1>
+          <Link to="/" className="c-back">← Continue Shopping</Link>
         </header>
 
-        {/* Body */}
         <div className="c-body">
-
-          {/* Products */}
           <section>
             {isLoading ? (
-              <div className="c-loading">
+              <div className="c-loading" style={{ textAlign: 'center', padding: '5rem' }}>
                 <div className="c-spinner" />
-                <p className="c-loading-text">Loading your bag...</p>
+                <p>Loading your bag...</p>
               </div>
             ) : productsInCart.length === 0 ? (
               <div className="c-empty">
-                <div className="c-empty-icon">
-                  <HiShoppingBag style={{ width: 34, height: 34 }} />
-                </div>
-
-                <div className="c-empty-title">
-                  Your bag is empty
-                </div>
-
-                <p className="c-empty-sub">
-                  Discover products you'll love and start shopping.
-                </p>
+                <div className="c-empty-icon"><HiShoppingBag size={40} /></div>
+                <div className="c-empty-title">Your bag is empty</div>
+                <p className="c-empty-sub">Discover products you'll love and start shopping.</p>
               </div>
             ) : (
               productsInCart.map((product) => (
                 <div key={product.id} className="c-item">
+                  <CartItemImage 
+  imagePath={product.image || ""} 
+  title={product.title || "Product Image"} 
+/>
 
-                  {/* Image */}
-                  <div className="c-item-img">
-                    <img
-src={getCleanImageUrl(product.image ?? "")}                      alt={product.title}
-                    />
-                  </div>
-
-                  {/* Info */}
                   <div className="c-item-info">
-
                     <div className="c-item-top">
                       <div style={{ minWidth: 0 }}>
-                        <Link
-                          to={`/product/${product.productId}`}
-                          className="c-item-name"
-                        >
+                        <Link to={`/product/${product.productId}`} className="c-item-name">
                           {product.title}
                         </Link>
-
-                        <div className="c-item-meta">
-                          {product.color || "Standard Edition"}
-                        </div>
+                        <div className="c-item-meta">{product.color || "Standard Edition"}</div>
                       </div>
-
                       <div className="c-item-price">
                         {safeNumber(product.price).toLocaleString()} EGP
                       </div>
                     </div>
 
                     <div className="c-item-bottom">
-
-                      {/* Quantity */}
                       <div className="c-qty">
                         <button
                           className="c-qty-btn"
-                          onClick={() =>
-                            handleUpdateQuantity(
-                              product.id,
-                              safeNumber(product.quantity) - 1
-                            )
-                          }
+                          onClick={() => handleUpdateQuantity(product.id, safeNumber(product.quantity) - 1)}
                           disabled={isLoading}
                         >
-                          <HiMinusSmall style={{ width: 16, height: 16 }} />
+                          <HiMinusSmall />
                         </button>
-
-                        <span className="c-qty-val">
-                          {safeNumber(product.quantity)}
-                        </span>
-
+                        <span className="c-qty-val">{safeNumber(product.quantity)}</span>
                         <button
                           className="c-qty-btn"
-                          onClick={() =>
-                            handleUpdateQuantity(
-                              product.id,
-                              safeNumber(product.quantity) + 1
-                            )
-                          }
+                          onClick={() => handleUpdateQuantity(product.id, safeNumber(product.quantity) + 1)}
                           disabled={isLoading}
                         >
-                          <HiPlusSmall style={{ width: 16, height: 16 }} />
+                          <HiPlusSmall />
                         </button>
                       </div>
 
-                      {/* Remove */}
                       <button
                         className="c-remove"
                         onClick={() => handleRemoveItem(product.id)}
                         disabled={isLoading}
                       >
-                        <HiOutlineTrash style={{ width: 15, height: 15 }} />
+                        <HiOutlineTrash />
                         Remove
                       </button>
-
                     </div>
                   </div>
-
                 </div>
               ))
             )}
           </section>
 
-          {/* Summary */}
           <section>
             <div className="c-summary">
-
-              <div className="c-summary-title">
+              <div className="c-summary-title" style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>
                 Order Summary
               </div>
 
               {subtotal > 500 && (
-                <div className="c-free-badge">
-                  <span className="c-free-dot" />
-                  Free Shipping Applied
+                <div className="c-free-badge" style={{ color: 'var(--success)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                  ✓ Free Shipping Applied
                 </div>
               )}
 
-              <div className="c-row">
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
                 <span>Subtotal</span>
-                <span className="c-row-val">
-                  {safeNumber(subtotal).toLocaleString()} EGP
-                </span>
+                <strong>{safeNumber(subtotal).toLocaleString()} EGP</strong>
               </div>
 
-              <div className="c-row">
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
                 <span>Shipping</span>
-
-                <span className={`c-row-val ${shippingCost === 0 ? "free" : ""}`}>
+                <strong style={{ color: shippingCost === 0 ? 'var(--success)' : 'inherit' }}>
                   {shippingCost === 0 ? "Free" : `${shippingCost} EGP`}
-                </span>
+                </strong>
               </div>
 
-              <div className="c-row">
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <span>Tax (14%)</span>
-
-                <span className="c-row-val">
-                  {safeNumber(tax).toLocaleString()} EGP
-                </span>
+                <strong>{safeNumber(tax).toLocaleString()} EGP</strong>
               </div>
 
-              <hr className="c-divider" />
+              <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '1rem 0' }} />
 
-              <div className="c-total-row">
-                <div className="c-total-label">Total</div>
-
-                <div className="c-total-val">
-                  {safeNumber(total).toLocaleString()} EGP
-                </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
+                <span style={{ fontSize: '1.1rem' }}>Total</span>
+                <span style={{ fontSize: '1.8rem', fontWeight: 800 }}>{safeNumber(total).toLocaleString()} EGP</span>
               </div>
 
               <Link to="/checkout" className="c-checkout">
                 <span>Proceed to Checkout</span>
-
-                <span className="c-checkout-arrow">
-                  →
-                </span>
+                <span className="c-checkout-arrow">→</span>
               </Link>
-
-              <p className="c-secure">
-                🔒 Secure & encrypted checkout
-              </p>
-
             </div>
           </section>
-
         </div>
       </div>
     </>
