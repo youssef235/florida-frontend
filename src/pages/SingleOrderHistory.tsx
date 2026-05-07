@@ -27,14 +27,24 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     const token = localStorage.getItem("token");
     if (!token) return redirect("/login");
 
-    // جلب الأوردر المحدد فقط باستخدام الـ ID من السيرفر مباشرة
-    const response = await customFetch.get(`/orders/${params.id}`, {
+    // 1. جلب كل الطلبات (لأن السيرفر يرجع Array كما أرفقت)
+    const response = await customFetch.get(`/orders`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    return response.data;
+    const allOrders = response.data;
+
+    // 2. البحث عن الأوردر المحدد باستخدام الـ ID من البرامترز
+    const singleOrder = allOrders.find((o: any) => o._id === params.id);
+
+    if (!singleOrder) {
+      console.error("Order not found in the list");
+      return redirect("/order-history");
+    }
+
+    return singleOrder;
   } catch (error) {
-    // إذا لم يجد الأوردر أو حدث خطأ ارجع للقائمة
+    console.error("Fetch error:", error);
     return redirect("/order-history");
   }
 };
