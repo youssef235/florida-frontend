@@ -59,7 +59,7 @@ const ProductItem = ({
 
         {hasDiscount && oldPrice && (
           <div className="absolute top-3 left-3 bg-black text-white text-[9px] px-2 py-1 uppercase font-bold tracking-tighter z-10">
-            -{Math.round(((oldPrice - price) / oldPrice) * 100)}%
+{oldPrice && price ? `-${Math.round(((oldPrice - price) / oldPrice) * 100)}%` : null}
           </div>
         )}
 
@@ -98,7 +98,7 @@ const ProductItem = ({
 
         <div className="flex items-center gap-2 mt-0.5">
           <span className={`text-[13px] ${hasDiscount ? "text-red-600 font-bold" : "font-semibold text-black"}`}>
-            {price.toLocaleString()} EGP
+{(price ?? 0).toLocaleString()} EGP
           </span>
           {hasDiscount && oldPrice && (
             <span className="text-[11px] text-gray-400 line-through decoration-gray-300">

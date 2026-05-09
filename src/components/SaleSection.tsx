@@ -3,7 +3,7 @@ import ProductItem from "./ProductItem";
 
 const SaleSection = ({ products }: { products: any[] }) => {
   // فلترة المنتجات التي عليها خصم فقط
-  const saleProducts = products.filter(p => p.hasDiscount === false).slice(0, 5);
+const saleProducts = products.filter(p => p.hasDiscount === true).slice(0, 5);
 
   if (saleProducts.length === 0) return null;
 
@@ -24,7 +24,7 @@ const SaleSection = ({ products }: { products: any[] }) => {
           <ProductItem
             key={product._id}
             id={product._id}
-            image={product.images[0]}
+image={product.images?.[0] || ""}
             title={product.name}
             category={product.categories[0]?.name}
             price={product.priceTags[1]?.price || product.priceTags[0]?.price} // السعر المخفض
