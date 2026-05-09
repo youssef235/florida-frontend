@@ -2,7 +2,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { addToCartApi, getCartApi, syncCartApi } from "../../data/cartApi";
 
 // cartSlice.ts
-export type ProductInCart = {  // ✅ أضف export
+export type ProductInCart = {
   id: string;
   productId: string;
   priceTag: string;
@@ -10,8 +10,10 @@ export type ProductInCart = {  // ✅ أضف export
   price: number;
   quantity: number;
   image?: string;
+
   size?: string;
   color?: string;
+  colorHex?: string;
 };
 
 type CartState = {
@@ -28,24 +30,45 @@ const initialState: CartState = {
 
 // ✅ يدعم _id و id في نفس الوقت
 const mapCartItem = (item: any): ProductInCart => {
-  // تأكد أن الخصائص هنا تطابق تماماً ما ترسله من صفحة المنتج
-  const productId = item.product?._id || item.product?.id;
+  const productId =
+    item.product?._id || item.product?.id;
+
   const size = item.size || "";
-  const color = item.color || "Standard"; // لاحظ أنك وضعت Standard كافتراضي في صفحة المنتج
+
+  const color =
+    item.color?.name ||
+    item.color ||
+    "Standard";
+
+  const colorHex =
+    item.color?.hex ||
+    item.colorHex ||
+    "";
 
   return {
-    id: productId + size + color, // توحيد التركيبة
-    productId: productId,
+    id:
+      productId +
+      size +
+      color +
+      colorHex,
+
+    productId,
     title: item.product?.name,
     price: item.priceTag?.price,
     quantity: item.quantity,
-    image: item.product?.images?.[0],
-    priceTag: item.priceTag?._id || item.priceTag?.id,
-    size: size,
-    color: color,
+
+    image:
+      item.product?.images?.[0],
+
+    priceTag:
+      item.priceTag?._id ||
+      item.priceTag?.id,
+
+    size,
+    color,
+    colorHex,
   };
 };
-
 export const loadCart = createAsyncThunk("cart/load", async () => {
   return await getCartApi();
 });
@@ -60,6 +83,7 @@ export const syncCart = createAsyncThunk(
       quantity: p.quantity || 1,
       size: p.size,    // ✅ أضف
       color: p.color,  // ✅ أضف
+      colorHex: p.colorHex,  // ✅ أضف
     }));
     return await syncCartApi(data);
   }

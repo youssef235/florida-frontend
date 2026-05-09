@@ -306,48 +306,157 @@ const Cart = () => {
   title={product.title || "Product Image"} 
 />
 
-                  <div className="c-item-info">
-                    <div className="c-item-top">
-                      <div style={{ minWidth: 0 }}>
-                        <Link to={`/product/${product.productId}`} className="c-item-name">
-                          {product.title}
-                        </Link>
-                        <div className="c-item-meta">{product.color || "Standard Edition"}</div>
-                      </div>
-                      <div className="c-item-price">
-                        {safeNumber(product.price).toLocaleString()} EGP
-                      </div>
-                    </div>
+                 <div className="c-item-info">
+  <div className="c-item-top">
+    <div style={{ minWidth: 0, flex: 1 }}>
+      <Link
+        to={`/product/${product.productId}`}
+        className="c-item-name"
+      >
+        {product.title}
+      </Link>
 
-                    <div className="c-item-bottom">
-                      <div className="c-qty">
-                        <button
-                          className="c-qty-btn"
-                          onClick={() => handleUpdateQuantity(product.id, safeNumber(product.quantity) - 1)}
-                          disabled={isLoading}
-                        >
-                          <HiMinusSmall />
-                        </button>
-                        <span className="c-qty-val">{safeNumber(product.quantity)}</span>
-                        <button
-                          className="c-qty-btn"
-                          onClick={() => handleUpdateQuantity(product.id, safeNumber(product.quantity) + 1)}
-                          disabled={isLoading}
-                        >
-                          <HiPlusSmall />
-                        </button>
-                      </div>
+      {/* Size + Color */}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "8px",
+          marginTop: "12px",
+          alignItems: "center",
+        }}
+      >
+        {/* Size */}
+        {product.size && (
+          <div
+            style={{
+              padding: "8px 14px",
+              borderRadius: "999px",
+              border: "1px solid #e2e8f0",
+              background: "#f8fafc",
+              fontSize: "12px",
+              fontWeight: 600,
+              color: "#0f172a",
+              letterSpacing: "0.02em",
+            }}
+          >
+            Size: {product.size}
+          </div>
+        )}
 
-                      <button
-                        className="c-remove"
-                        onClick={() => handleRemoveItem(product.id)}
-                        disabled={isLoading}
-                      >
-                        <HiOutlineTrash />
-                        Remove
-                      </button>
-                    </div>
-                  </div>
+        {/* Color */}
+        {product.color &&
+          product.color !== "Standard" && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "7px 12px",
+                borderRadius: "999px",
+                border: "1px solid #e2e8f0",
+                background: "#f8fafc",
+              }}
+            >
+              {/* دائرة اللون */}
+              {product.colorHex && (
+                <div
+                  style={{
+                    width: "18px",
+                    height: "18px",
+                    borderRadius: "50%",
+                    backgroundColor: product.colorHex,
+                    border: "1px solid #d1d5db",
+                    boxShadow:
+                      "0 1px 4px rgba(0,0,0,0.08)",
+                    flexShrink: 0,
+                  }}
+                />
+              )}
+
+              <span
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: "#0f172a",
+                }}
+              >
+                {product.color}
+              </span>
+            </div>
+          )}
+      </div>
+    </div>
+
+    <div
+      className="c-item-price"
+      style={{
+        whiteSpace: "nowrap",
+      }}
+    >
+      {safeNumber(product.price).toLocaleString()} EGP
+    </div>
+  </div>
+
+  <div
+    className="c-item-bottom"
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: "1rem",
+      flexWrap: "wrap",
+    }}
+  >
+    <div className="c-qty">
+      <button
+        className="c-qty-btn"
+        onClick={() =>
+          handleUpdateQuantity(
+            product.id,
+            safeNumber(product.quantity) - 1
+          )
+        }
+        disabled={isLoading}
+      >
+        <HiMinusSmall />
+      </button>
+
+      <span
+        className="c-qty-val"
+        style={{
+          minWidth: "32px",
+          textAlign: "center",
+          fontWeight: 600,
+        }}
+      >
+        {safeNumber(product.quantity)}
+      </span>
+
+      <button
+        className="c-qty-btn"
+        onClick={() =>
+          handleUpdateQuantity(
+            product.id,
+            safeNumber(product.quantity) + 1
+          )
+        }
+        disabled={isLoading}
+      >
+        <HiPlusSmall />
+      </button>
+    </div>
+
+    <button
+      className="c-remove"
+      onClick={() => handleRemoveItem(product.id)}
+      disabled={isLoading}
+    >
+      <HiOutlineTrash />
+      Remove
+    </button>
+  </div>
+</div>
                 </div>
               ))
             )}

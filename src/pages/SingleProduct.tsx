@@ -19,11 +19,13 @@ import { fetchWishlist, addToWishlist, removeFromWishlist } from "../features/wi
 import { useAppDispatch, useAppSelector } from "../hooks";
 import customFetch from "../axios/custom";
 import { Dropdown } from "../components";
-import { useImageUrl } from "../hooks/useImageUrl"; // استيراد الهوك
+import { useImageUrl } from "../hooks/useImageUrl";
 
 const SingleProduct = () => {
   const [singleProduct, setSingleProduct] = useState<any>(null);
-  const [size, setSize] = useState<string>("");
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [selectedColor, setSelectedColor] = useState<any>(null);
+  const [selectedPriceTag, setSelectedPriceTag] = useState<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const params = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
@@ -32,8 +34,6 @@ const SingleProduct = () => {
 
   const dragX = useMotionValue(0);
 
-  // استخدام الهوك لمعالجة رابط الصورة الحالية
-  // نمرر الصورة الحالية بناءً على currentIndex
   const currentImagePath = singleProduct?.images?.[currentIndex] || "";
   const { src: imageSrc, status: imageStatus } = useImageUrl(currentImagePath);
 
@@ -43,8 +43,12 @@ const SingleProduct = () => {
     const fetchSingleProduct = async () => {
       try {
         const response = await customFetch.get(`/products/${params.id}`);
-        // بناءً على الـ JSON الخاص بك، البيانات تأتي مباشرة في response.data
-        setSingleProduct(response.data);
+        const product = response.data;
+        setSingleProduct(product);
+        // اختر أول سعر تلقائياً
+        if (product.priceTags?.length > 0) {
+          setSelectedPriceTag(product.priceTags[0]);
+        }
       } catch (error) {
         console.error(error);
         toast.error("Error fetching product");
@@ -57,19 +61,15 @@ const SingleProduct = () => {
   }, [params.id, dispatch]);
 
   const nextSlide = () => {
-    if (currentIndex < singleProduct?.images?.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      setCurrentIndex(0);
-    }
+    setCurrentIndex((prev) =>
+      prev < singleProduct?.images?.length - 1 ? prev + 1 : 0
+    );
   };
 
   const prevSlide = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    } else {
-      setCurrentIndex(singleProduct?.images?.length - 1);
-    }
+    setCurrentIndex((prev) =>
+      prev > 0 ? prev - 1 : singleProduct?.images?.length - 1
+    );
   };
 
   const onDragEnd = () => {
@@ -79,7 +79,7 @@ const SingleProduct = () => {
   };
 
   const handleAddToCart = async () => {
-    if (!size) {
+    if (singleProduct.sizes?.length > 0 && !selectedSize) {
       toast.error("Please select a size", {
         style: { borderRadius: "0", background: "#000", color: "#fff", fontSize: "11px" },
       });
@@ -88,15 +88,15 @@ const SingleProduct = () => {
 
     dispatch(
       addProductToTheCart({
-        id: singleProduct._id + size,
+        id: singleProduct._id + (selectedSize || "") + (selectedColor?.hex || ""),
         productId: singleProduct._id,
-        priceTag: singleProduct.priceTags?.[0]?._id,
+        priceTag: selectedPriceTag?._id,
         title: singleProduct.name,
-        price: singleProduct.priceTags?.[0]?.price,
+        price: selectedPriceTag?.price,
         quantity: 1,
         image: singleProduct.images?.[0],
-        size,
-        color: singleProduct.colors?.[0] || "Standard",
+        size: selectedSize,
+        color: selectedColor?.name || "Standard",
       })
     );
 
@@ -120,10 +120,14 @@ const SingleProduct = () => {
     </div>
   );
 
+  const hasSizes = singleProduct.sizes?.length > 0;
+  const hasColors = singleProduct.colors?.length > 0;
+  const hasPriceTags = singleProduct.priceTags?.length > 0;
+
   return (
     <div className="bg-white min-h-screen pb-32 lg:pb-0">
       <div className="max-w-[1920px] mx-auto flex flex-col lg:flex-row">
-        
+
         {/* القسم الأيسر: معرض الصور */}
         <div className="relative w-full lg:w-[60%] h-[65vh] md:h-[75vh] lg:h-screen overflow-hidden bg-[#f9f9f9]">
           <motion.div
@@ -136,7 +140,7 @@ const SingleProduct = () => {
             <AnimatePresence mode="popLayout">
               <motion.img
                 key={currentIndex}
-                src={imageSrc} // الرابط المعالج بواسطة useImageUrl
+                src={imageSrc}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: imageStatus === "loaded" ? 1 : 0.5 }}
                 exit={{ opacity: 0 }}
@@ -149,90 +153,133 @@ const SingleProduct = () => {
             </AnimatePresence>
           </motion.div>
 
-          {/* أزرار التنقل - تظهر في الشاشات الكبيرة فقط */}
-          <button
-            onClick={prevSlide}
-            className="hidden lg:flex absolute left-6 top-1/2 -translate-y-1/2 p-4 bg-white/70 backdrop-blur-md rounded-full hover:bg-white transition-all shadow-lg z-10"
-          >
+          <button onClick={prevSlide} className="hidden lg:flex absolute left-6 top-1/2 -translate-y-1/2 p-4 bg-white/70 backdrop-blur-md rounded-full hover:bg-white transition-all shadow-lg z-10">
             <HiOutlineChevronLeft className="w-5 h-5" />
           </button>
-
-          <button
-            onClick={nextSlide}
-            className="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 p-4 bg-white/70 backdrop-blur-md rounded-full hover:bg-white transition-all shadow-lg z-10"
-          >
+          <button onClick={nextSlide} className="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 p-4 bg-white/70 backdrop-blur-md rounded-full hover:bg-white transition-all shadow-lg z-10">
             <HiOutlineChevronRight className="w-5 h-5" />
           </button>
 
-          {/* مؤشرات الصور (Dots) */}
           <div className="absolute bottom-6 w-full flex justify-center gap-1.5 z-10">
-            {singleProduct.images.map((_: any, i: number) => (
+            {singleProduct.images?.map((_: any, i: number) => (
               <div
                 key={i}
-                className={`h-1 rounded-full transition-all duration-300 ${
+                onClick={() => setCurrentIndex(i)}
+                className={`h-1 rounded-full transition-all duration-300 cursor-pointer ${
                   i === currentIndex ? "w-8 bg-black" : "w-1.5 bg-black/20"
                 }`}
               />
             ))}
           </div>
 
-          {/* زر الرجوع للموبايل */}
-          <button
-            onClick={() => window.history.back()}
-            className="lg:hidden absolute top-6 left-6 p-3 bg-white/80 backdrop-blur-md rounded-full shadow-sm z-10"
-          >
+          <button onClick={() => window.history.back()} className="lg:hidden absolute top-6 left-6 p-3 bg-white/80 backdrop-blur-md rounded-full shadow-sm z-10">
             <HiOutlineChevronLeft className="w-5 h-5" />
           </button>
         </div>
 
         {/* القسم الأيمن: تفاصيل المنتج */}
         <div className="w-full lg:w-[40%] px-6 py-8 lg:py-20 lg:px-16 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto bg-white">
+          
           <div className="flex justify-between items-start mb-3">
             <h1 className="text-2xl lg:text-4xl font-medium leading-tight uppercase tracking-tight text-gray-900">
               {singleProduct.name}
             </h1>
-
             <button onClick={toggleWishlist} className="relative group transition-all">
               {isWishlisted ? (
                 <HiHeart className="w-6 h-6 text-red-500 transition-all duration-200 scale-110" />
               ) : (
                 <HiOutlineHeart className="w-6 h-6 text-gray-400 group-hover:text-red-400 transition-all duration-200" />
               )}
-              {isWishlisted && (
-                <span className="absolute inset-0 rounded-full bg-red-500/10 blur-md scale-150" />
-              )}
             </button>
           </div>
 
-          <p className="text-xl lg:text-2xl font-semibold text-gray-900 mb-8">
-            {singleProduct.priceTags?.[0]?.price?.toLocaleString()} EGP
-          </p>
-
-          <div className="mb-10">
-            <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-wider mb-4 text-gray-500">
-              <span>Select Size</span>
-              <span className="text-gray-400 underline underline-offset-4 cursor-pointer">
-                Size Guide
-              </span>
+          {/* ── الأسعار ── */}
+          {hasPriceTags && (
+            <div className="mb-6">
+              {singleProduct.priceTags.length === 1 ? (
+                <p className="text-xl lg:text-2xl font-semibold text-gray-900">
+                  {singleProduct.priceTags[0].price?.toLocaleString()} EGP
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {singleProduct.priceTags.map((tag: any) => (
+                    <button
+                      key={tag._id}
+                      onClick={() => setSelectedPriceTag(tag)}
+                      className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${
+                        selectedPriceTag?._id === tag._id
+                          ? "bg-black text-white border-black"
+                          : "border-gray-200 text-gray-600 hover:border-gray-400"
+                      }`}
+                    >
+                      {tag.name} — {tag.price?.toLocaleString()} EGP
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+          )}
 
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-              {["XS", "S", "M", "L", "XL", "XXL"].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSize(s)}
-                  className={`h-14 flex items-center justify-center rounded-md border text-xs font-medium transition-all
-                    ${
-                      size === s
+          {/* ── المقاسات ── */}
+          {hasSizes && (
+            <div className="mb-8">
+              <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-wider mb-3 text-gray-500">
+                <span>Select Size</span>
+                {selectedSize && (
+                  <span className="text-black font-bold">{selectedSize}</span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {singleProduct.sizes.map((s: string) => (
+                  <button
+                    key={s}
+                    onClick={() => setSelectedSize(s)}
+                    className={`h-11 px-4 flex items-center justify-center rounded-lg border text-xs font-semibold transition-all ${
+                      selectedSize === s
                         ? "border-black bg-black text-white shadow-sm"
-                        : "border-gray-200 text-gray-600 hover:border-gray-300"
+                        : "border-gray-200 text-gray-600 hover:border-gray-400"
                     }`}
-                >
-                  {s}
-                </button>
-              ))}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* ── الألوان ── */}
+          {hasColors && (
+            <div className="mb-8">
+              <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-wider mb-3 text-gray-500">
+                <span>Select Color</span>
+                {selectedColor && (
+                  <span className="text-black font-bold"></span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-3">
+                {singleProduct.colors.map((color: any) => (
+                  <button
+                    key={color.hex}
+                    onClick={() => setSelectedColor(color)}
+                    title={color.name}
+                    className="relative"
+                  >
+                    <div
+                      style={{ backgroundColor: color.hex }}
+                      className={`w-9 h-9 rounded-full border-2 transition-all ${
+                        selectedColor?.hex === color.hex
+                          ? "border-black scale-110 shadow-md"
+                          : "border-gray-200 hover:scale-105"
+                      }`}
+                    />
+                    {selectedColor?.hex === color.hex && (
+                      <div className="absolute inset-0 rounded-full ring-2 ring-black ring-offset-2" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="border-t border-gray-100 pt-6 space-y-8">
             <Dropdown dropdownTitle="Product Details">
@@ -240,7 +287,6 @@ const SingleProduct = () => {
                 {singleProduct.description || "A premium essential designed for maximum comfort and style."}
               </div>
             </Dropdown>
-
             <Dropdown dropdownTitle="Shipping & Returns">
               <div className="py-3 text-xs text-gray-500 uppercase tracking-widest leading-loose">
                 Free shipping on orders above 2500 EGP. Returns within 14 days.
@@ -248,7 +294,6 @@ const SingleProduct = () => {
             </Dropdown>
           </div>
 
-          {/* أزرار السلة للشاشات الكبيرة */}
           <div className="hidden lg:flex flex-col gap-3 mt-8 pt-6 border-t border-gray-100">
             <button
               onClick={handleAddToCart}
@@ -264,17 +309,14 @@ const SingleProduct = () => {
         </div>
       </div>
 
-      {/* بار الموبايل السفلي الثابت */}
+      {/* بار الموبايل السفلي */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 px-4 py-3 bg-white/95 backdrop-blur-lg border-t border-gray-100 z-[99] flex gap-3 items-center shadow-lg">
         <div className="flex flex-col justify-center min-w-[100px]">
-          <span className="text-[10px] text-gray-400 uppercase font-bold tracking-tight">
-            Total Price
-          </span>
+          <span className="text-[10px] text-gray-400 uppercase font-bold tracking-tight">Total Price</span>
           <span className="text-sm font-semibold text-gray-900">
-            {singleProduct.priceTags?.[0]?.price?.toLocaleString()} EGP
+            {selectedPriceTag?.price?.toLocaleString() ?? singleProduct.priceTags?.[0]?.price?.toLocaleString()} EGP
           </span>
         </div>
-
         <button
           onClick={handleAddToCart}
           disabled={isLoading}
