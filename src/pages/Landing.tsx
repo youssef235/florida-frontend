@@ -3,6 +3,8 @@ import { Banner, CategoriesSection } from "../components";
 import ProductGrid from "../components/ProductGrid";
 import SaleSection from "../components/SaleSection";
 import customFetch from "../axios/custom";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 interface Product {
   _id: string;
@@ -18,6 +20,24 @@ const Landing = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [latestProducts, setLatestProducts] = useState<Product[]>([]);
 
+  const { t } = useTranslation();
+
+  // 🔥 مهم جدًا: يجبر React يعمل re-render عند تغيير اللغة
+  const [lang, setLang] = useState(i18n.language);
+
+  useEffect(() => {
+    const handleLangChange = (lng: string) => {
+      setLang(lng);
+    };
+
+    i18n.on("languageChanged", handleLangChange);
+
+    return () => {
+      i18n.off("languageChanged", handleLangChange);
+    };
+  }, []);
+
+  // Products fetch
   useEffect(() => {
     const getProducts = async () => {
       try {
@@ -63,7 +83,7 @@ const Landing = () => {
               text-gray-700
               font-medium
             ">
-              New Arrivals
+              {t("home.new_arrivals")}
             </h2>
 
             <div className="w-8 md:w-10 h-[2px] bg-gray-300 mt-2"></div>
@@ -80,7 +100,7 @@ const Landing = () => {
             transition
             px-2 py-1
           ">
-            View All
+            {t("home.view_all")}
           </button>
 
         </div>

@@ -78,32 +78,53 @@ const SingleProduct = () => {
     else if (x >= 50) prevSlide();
   };
 
-  const handleAddToCart = async () => {
-    if (singleProduct.sizes?.length > 0 && !selectedSize) {
-      toast.error("Please select a size", {
-        style: { borderRadius: "0", background: "#000", color: "#fff", fontSize: "11px" },
-      });
-      return;
-    }
+const handleAddToCart = async () => {
+  // إجبار اختيار المقاس
+  if (singleProduct.sizes?.length > 0 && !selectedSize) {
+    toast.error("Please select a size", {
+      style: {
+        borderRadius: "0",
+        background: "#000",
+        color: "#fff",
+        fontSize: "11px",
+      },
+    });
+    return;
+  }
 
-    dispatch(
-      addProductToTheCart({
-        id: singleProduct._id + (selectedSize || "") + (selectedColor?.hex || ""),
-        productId: singleProduct._id,
-        priceTag: selectedPriceTag?._id,
-        title: singleProduct.name,
-        price: selectedPriceTag?.price,
-        quantity: 1,
-        image: singleProduct.images?.[0],
-        size: selectedSize,
-        color: selectedColor?.name || "Standard",
-      })
-    );
+  // إجبار اختيار اللون
+  if (singleProduct.colors?.length > 0 && !selectedColor) {
+    toast.error("Please select a color", {
+      style: {
+        borderRadius: "0",
+        background: "#000",
+        color: "#fff",
+        fontSize: "11px",
+      },
+    });
+    return;
+  }
 
-    await dispatch(syncCart());
-    toast.success("Added to Bag");
-  };
+  dispatch(
+    addProductToTheCart({
+      id:
+        singleProduct._id +
+        (selectedSize || "") +
+        (selectedColor?.hex || ""),
+      productId: singleProduct._id,
+      priceTag: selectedPriceTag?._id,
+      title: singleProduct.name,
+      price: selectedPriceTag?.price,
+      quantity: 1,
+      image: singleProduct.images?.[0],
+      size: selectedSize,
+      color: selectedColor?.name || "Standard",
+    })
+  );
 
+  await dispatch(syncCart());
+  toast.success("Added to Bag");
+};
   const toggleWishlist = async () => {
     if (!params.id) return;
     if (isWishlisted) {

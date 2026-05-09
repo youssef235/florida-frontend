@@ -1,0 +1,30 @@
+{
+  "banner": {
+    "new_collection": "مجموعة جديدة 2026",
+    "title": "اكتشف أفضل \n تشكيلة أزياء",
+    "subtitle": "تشكيلة عالية الجودة",
+    "shop_now": "تسوق الآن",
+    "see_collection": "عرض التشكيلة"
+  },
+   "sidebar": {
+    "home": "الرئيسية",
+    "shop": "المتجر",
+    "search": "بحث",
+    "wishlist": "المفضلة",
+    "cart": "السلة",
+    "orders": "الطلبات",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "logout": "تسجيل الخروج",
+    "logout_success": "تم تسجيل الخروج بنجاح",
+    "footer": "© 2024 جميع الحقوق محفوظة"
+  },
+  "home": {
+    "new_arrivals": "وصل حديثاً",
+    "view_all": "عرض الكل"
+  },
+  "add_to_cart": "أضف إلى السلة",
+  "shopping_bag": "سلة التسوق",
+  "continue_shopping": "متابعة التسوق",
+  "total_price": "السعر الإجمالي"
+}

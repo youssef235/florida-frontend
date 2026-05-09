@@ -1,0 +1,30 @@
+{
+  "banner": {
+    "new_collection": "New Collection 2026",
+    "title": "Discover the Best \n Fashion Collection",
+    "subtitle": "The High-Quality Collection",
+    "shop_now": "Shop Now",
+    "see_collection": "See Collection"
+  },
+  "sidebar": {
+    "home": "Home",
+    "shop": "Shop",
+    "search": "Search",
+    "wishlist": "Wishlist",
+    "cart": "Cart",
+    "orders": "Orders",
+    "login": "Sign In",
+    "register": "Create Account",
+    "logout": "Logout",
+    "logout_success": "Logged out successfully",
+    "footer": "© 2024 All rights reserved"
+  },
+  "home": {
+    "new_arrivals": "وصل حديثاً",
+    "view_all": "عرض الكل"
+  },
+  "add_to_cart": "Add to Cart",
+  "shopping_bag": "Shopping Bag",
+  "continue_shopping": "Continue Shopping",
+  "total_price": "Total Price"
+}

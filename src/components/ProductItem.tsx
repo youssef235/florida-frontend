@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { HiOutlineShoppingBag, HiOutlineEye } from "react-icons/hi";
 import { useImageUrl } from "../hooks/useImageUrl";
+import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 interface ProductItemProps {
   id: string;
@@ -12,8 +14,8 @@ interface ProductItemProps {
   oldPrice?: number | null;
   variant?: "minimal" | "detailed";
 }
-
 const ProductItem = ({
+  
   id,
   image,
   title,
@@ -24,6 +26,7 @@ const ProductItem = ({
   variant = "minimal",
 }: ProductItemProps) => {
   const { src, status } = useImageUrl(image);
+  const { t } = useTranslation();
 
   return (
     <div className="group flex flex-col w-full bg-white transition-all duration-300">
@@ -97,7 +100,7 @@ const ProductItem = ({
       />
 
       <span className="truncate">
-        Add to Cart
+        {t("add_to_cart")}
       </span>
     </button>
 

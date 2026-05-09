@@ -1,18 +1,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap');
 
+/* 1. تعريف خط IBM Plex Sans Arabic بمختلف أوزانه */
+@font-face {
+  font-family: 'IBMPlexArabic';
+  src: url('/assets/fonts/IBMPlexSansArabic-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBMPlexArabic';
+  src: url('/assets/fonts/IBMPlexSansArabic-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IBMPlexArabic';
+  src: url('/assets/fonts/IBMPlexSansArabic-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    /* Montserrat للـ Headings و Inter للنصوص الطويلة لراحة العين */
+    /* الخط الافتراضي للإنجليزي */
     font-family: 'Inter', sans-serif;
     background-color: #fafafa;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: #1a1a1a; /* لون أسود ناعم بدلاً من الأسود الصريح */
+    color: #1a1a1a;
+  }
+
+  /* 2. تغيير الخط للعربي فقط عند وجود كلاس lang-ar بدون قلب الاتجاه */
+  body.lang-ar,
+  body.lang-ar h1, 
+  body.lang-ar h2, 
+  body.lang-ar h3, 
+  body.lang-ar h4, 
+  body.lang-ar h5, 
+  body.lang-ar h6,
+  body.lang-ar .logo-font {
+    font-family: 'IBMPlexArabic', sans-serif !important;
   }
 
   h1, h2, h3, h4, h5, h6, .logo-font {
@@ -20,10 +57,10 @@
   }
 }
 
-/* تحسين الـ Banners بلمسة ناعمة */
+/* تحسين الـ Banners */
 .banner {
-  height: 100svh; /* كامل شاشة الموبايل بالظبط */
-  min-height: unset; /* إلغاء الـ min-height القديم */
+  height: 100svh;
+  min-height: unset;
   background: linear-gradient(
       to bottom,
       rgba(0, 0, 0, 0.1) 0%,
@@ -31,13 +68,12 @@
     ),
     url("/assets/c2.jpeg") no-repeat;
   background-size: cover;
-  background-position: center top; /* على الموبايل top أحسن من center */
+  background-position: center top;
   display: flex;
-  align-items: flex-end; /* المحتوى تحت زي ما هو */
+  align-items: flex-end;
   justify-content: center;
 }
 
-/* تصغير البانر على الشاشات الكبيرة بس */
 @media (min-width: 640px) {
   .banner {
     height: 80vh;
@@ -45,6 +81,7 @@
     align-items: center;
   }
 }
+
 .shop-banner {
   min-height: 400px; 
   background: linear-gradient(
@@ -56,31 +93,32 @@
   background-position: center;
 }
 
-/* Animations - تحسين الأنيميشن ليكون أسرع وأكثر سلاسة */
+/* Animations - تم تثبيت الاتجاه ليكون دائماً من اليسار */
 .sidebar-enter {
   transform: translateX(-100%);
 }
+
 .sidebar-enter-active {
   transform: translateX(0);
-  transition: transform 400px cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Table Styles - لمسة عصرية للجداول */
+/* Table Styles - المحاذاة تتبع الـ TextAlign المحدد في الـ body */
 .singleOrder-table {
   @apply w-full border-collapse;
 }
 
 .singleOrder-table th {
   @apply bg-gray-50 text-gray-600 font-semibold py-3 px-4 border-b border-gray-100;
-  text-align: left;
+  text-align: inherit; 
 }
 
 .singleOrder-table td {
   @apply py-4 px-4 border-b border-gray-50 transition-colors hover:bg-gray-50/50;
-  text-align: left;
+  text-align: inherit;
 }
 
-/* Custom Scrollbar عشان الروقان يكمل */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }

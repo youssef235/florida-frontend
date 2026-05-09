@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 const MOBILE_IMAGES = [
   "/assets/n1.jpg",
@@ -8,7 +9,11 @@ const MOBILE_IMAGES = [
 ];
 
 const Banner = () => {
+  const { t, i18n } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // فحص هل اللغة الحالية هي العربية
+  const isArabic = i18n.language === "ar";
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -18,7 +23,11 @@ const Banner = () => {
   }, []);
 
   return (
-    <div className="relative w-full overflow-hidden" style={{ height: "100svh", minHeight: "unset" }}>
+    <div 
+      className={`relative w-full overflow-hidden ${isArabic ? "font-arabic" : ""}`} 
+      style={{ height: "100svh", minHeight: "unset" }}
+      dir={i18n.dir()}
+    >
 
       {/* ===== MOBILE: Slideshow ===== */}
       <div className="sm:hidden absolute inset-0">
@@ -50,23 +59,23 @@ const Banner = () => {
       <div className="relative z-10 w-full h-full flex flex-col justify-end items-center pb-10 sm:pb-12 px-5">
 
         <span className="text-white/70 text-[10px] uppercase tracking-[0.3em] font-semibold mb-3 border border-white/30 px-3 py-1 rounded-full backdrop-blur-sm">
-          New Collection 2026
+          {t("banner.new_collection")}
         </span>
 
-        <h2 className="text-white text-center font-bold tracking-tight leading-tight
-          text-4xl sm:text-5xl lg:text-6xl
+        {/* أضفت هنا تحكم في حجم الخط للعربي ليكون أكثر تناسقاً */}
+        <h2 className={`text-white text-center font-bold tracking-tight leading-tight
+          ${isArabic ? "text-3xl sm:text-5xl lg:text-7xl" : "text-4xl sm:text-5xl lg:text-6xl"}
           max-w-[320px] sm:max-w-[500px] lg:max-w-none
-          mb-2
-        ">
-          Discover the Best <br />
-          Fashion Collection
+          mb-2 whitespace-pre-line`}
+        >
+          {t("banner.title")}
         </h2>
 
         <h3 className="text-white/80 text-center font-light tracking-wide
           text-base sm:text-xl lg:text-2xl
           mb-6 sm:mb-8
         ">
-          The High-Quality Collection
+          {t("banner.subtitle")}
         </h3>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-3 w-full max-w-[340px] sm:max-w-[420px]">
@@ -77,7 +86,7 @@ const Banner = () => {
               hover:bg-black hover:text-white transition-all duration-300 rounded-sm
             "
           >
-            Shop Now
+            {t("banner.shop_now")}
           </Link>
           <Link
             to="/shop"
@@ -86,7 +95,7 @@ const Banner = () => {
               hover:bg-white hover:text-black transition-all duration-300 rounded-sm backdrop-blur-sm
             "
           >
-            See Collection
+            {t("banner.see_collection")}
           </Link>
         </div>
 

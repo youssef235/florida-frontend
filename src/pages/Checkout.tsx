@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import customFetch from "../axios/custom";
 import { clearCart, syncCart } from "../features/cart/cartSlice";
+import { useImageUrl } from "../hooks/useImageUrl";
 
 const Checkout = () => {
   const { productsInCart, subtotal } = useAppSelector((state) => state.cart);
@@ -59,7 +60,23 @@ const Checkout = () => {
       setLoading(false);
     }
   };
+const CartItemImage = ({
+  image,
+  title,
+}: {
+  image?: string;
+  title: string;
+}) => {
+  const { src } = useImageUrl(image || "");
 
+  return (
+    <img
+      src={src}
+      alt={title}
+      className="co-item-img"
+    />
+  );
+};
   return (
     <>
       <style>{`
@@ -171,10 +188,9 @@ const Checkout = () => {
                     <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "1.5rem" }}>
                       {productsInCart.map((p) => (
                         <div key={p.id} style={{ display: "flex", gap: "0.85rem", alignItems: "center" }}>
-                          <img
-                            src={`${customFetch.defaults.baseURL}${p.image}`}
-                            alt={p.title}
-                            className="co-item-img"
+                          <CartItemImage
+                         image={p?.image}
+  title={p.title}
                           />
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 600, fontSize: "0.88rem", color: "#0D0D0D", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.title}</div>
