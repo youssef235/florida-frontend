@@ -62,20 +62,65 @@ const ProductItem = ({
 {oldPrice && price ? `-${Math.round(((oldPrice - price) / oldPrice) * 100)}%` : null}
           </div>
         )}
+{variant === "detailed" && (
+  <div
+    className="
+      absolute bottom-0 left-0 w-full
+      p-2 sm:p-3 md:p-4
+      translate-y-full group-hover:translate-y-0
+      transition-transform duration-500 ease-in-out
+      flex items-center gap-2
+      z-20
+    "
+  >
+    <button
+      className="
+        flex-1
+        bg-white text-black
+        h-11 sm:h-12 md:h-[52px]
+        rounded-xl
+        text-[9px] sm:text-[10px] md:text-[11px]
+        uppercase font-bold
+        tracking-[0.15em] sm:tracking-[0.2em]
+        flex items-center justify-center
+        gap-1 sm:gap-2
+        shadow-2xl
+        hover:bg-black hover:text-white
+        active:scale-[0.98]
+        transition-all duration-300
+        whitespace-nowrap
+      "
+    >
+      <HiOutlineShoppingBag
+        size={16}
+        className="shrink-0"
+      />
 
-        {variant === "detailed" && (
-          <div className="absolute bottom-0 left-0 w-full p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-in-out flex gap-2 z-20">
-            <button className="flex-1 bg-white text-black py-3 text-[10px] uppercase font-bold tracking-[0.2em] flex items-center justify-center gap-2 shadow-2xl hover:bg-black hover:text-white transition-all duration-300">
-              <HiOutlineShoppingBag size={16} /> Add to Cart
-            </button>
-            <Link
-              to={`/product/${id}`}
-              className="bg-white text-black p-3 shadow-2xl hover:bg-black hover:text-white transition-all duration-300"
-            >
-              <HiOutlineEye size={16} />
-            </Link>
-          </div>
-        )}
+      <span className="truncate">
+        Add to Cart
+      </span>
+    </button>
+
+    <Link
+      to={`/product/${id}`}
+      className="
+        bg-white text-black
+        h-11 w-11
+        sm:h-12 sm:w-12
+        md:h-[52px] md:w-[52px]
+        rounded-xl
+        shadow-2xl
+        flex items-center justify-center
+        shrink-0
+        hover:bg-black hover:text-white
+        active:scale-[0.95]
+        transition-all duration-300
+      "
+    >
+      <HiOutlineEye size={18} />
+    </Link>
+  </div>
+)}
       </div>
 
       <div
