@@ -1,0 +1,14 @@
+version: "2"
+authtoken: 3DM4DRmHaJPhBs5CUC4kSIk8OgY_5Rt34VZAtmgwBpyHwJRNT
+tunnels:
+  backend:
+    proto: http
+    addr: 4000
+    response_header:
+      add:
+        - "Access-Control-Allow-Origin: *"
+        - "Access-Control-Allow-Headers: Content-Type,Authorization,ngrok-skip-browser-warning"
+        - "Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS,PATCH"
+
+
+        
