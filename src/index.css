@@ -529,3 +529,49 @@ a:focus-visible {
   user-select: none;
   -webkit-user-drag: none;
 }
+/* ============================================
+   TOAST GLASS EFFECT
+   ============================================ */
+
+[data-hot-toast] {
+  animation: toast-enter 0.45s
+    cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-20px)
+      scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0)
+      scale(1);
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  [data-hot-toast] {
+    max-width: 92vw !important;
+    min-width: unset !important;
+  }
+}
+
+
+[data-hot-toast] > div {
+  background: transparent !important;
+}
+
+/* تطبيق الـ glass على العنصر الصحيح */
+[data-hot-toast] > div > div {
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  color: #1a1a1a !important;
+}

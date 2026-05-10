@@ -174,27 +174,14 @@ const SingleProduct = () => {
   };
 
   const handleAddToCart = async () => {
+    // ✅ بدون style مخصص — يأخذ الـ style من main.tsx تلقائياً
     if (singleProduct.sizes?.length > 0 && !selectedSize) {
-      toast.error(t("product.select_size"), {
-        style: {
-          borderRadius: "12px",
-          background: "#000",
-          color: "#fff",
-          fontSize: "13px",
-        },
-      });
+      toast.error(t("product.select_size"));
       return;
     }
 
     if (singleProduct.colors?.length > 0 && !selectedColor) {
-      toast.error(t("product.select_color"), {
-        style: {
-          borderRadius: "12px",
-          background: "#000",
-          color: "#fff",
-          fontSize: "13px",
-        },
-      });
+      toast.error(t("product.select_color"));
       return;
     }
 
@@ -213,14 +200,8 @@ const SingleProduct = () => {
     );
 
     await dispatch(syncCart());
-    toast.success(t("product.added_to_bag"), {
-      style: {
-        borderRadius: "12px",
-        background: "#000",
-        color: "#fff",
-        fontSize: "13px",
-      },
-    });
+    // ✅ بدون style مخصص
+    toast.success(t("product.added_to_bag"));
   };
 
   const toggleWishlist = async () => {
@@ -337,9 +318,6 @@ const SingleProduct = () => {
               />
             ))}
           </div>
-
-          {/* Thumbnails Strip (Desktop) */}
-     
 
           {/* Mobile Back Button */}
           <button 

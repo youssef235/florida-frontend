@@ -11,7 +11,8 @@ import "./i18n";
 import { useTranslation } from "react-i18next";
 
 /**
- * RootWrapper - Handles language direction and fonts
+ * RootWrapper - Handles language direction,
+ * fonts, and toast styling
  */
 const RootWrapper = () => {
   const { i18n } = useTranslation();
@@ -22,58 +23,91 @@ const RootWrapper = () => {
     const lang = i18n.language;
 
     const applyChanges = () => {
-      // Save current scroll position
       const scrollX = window.scrollX;
       const scrollY = window.scrollY;
 
-      // Apply direction and language
       document.documentElement.dir = dir;
       document.documentElement.lang = lang;
 
-      // Update body classes
-      document.body.classList.remove("dir-ltr", "dir-rtl", "lang-ar");
-      document.body.classList.add(`dir-${dir}`);
-      if (lang === "ar") document.body.classList.add("lang-ar");
+      document.body.classList.remove(
+        "dir-ltr",
+        "dir-rtl",
+        "lang-ar"
+      );
 
-      // Restore scroll position to prevent jump
+      document.body.classList.add(`dir-${dir}`);
+
+      if (lang === "ar") {
+        document.body.classList.add("lang-ar");
+      }
+
       if (prevLang.current !== lang) {
         requestAnimationFrame(() => {
           window.scrollTo(scrollX, scrollY);
         });
+
         prevLang.current = lang;
       }
     };
 
-    // Batch changes in next frame
     requestAnimationFrame(applyChanges);
   }, [i18n.language]);
 
-  // Determine toast position based on direction
-  const toastPosition = i18n.dir() === "rtl" ? "top-left" : "top-right";
+  const isRTL = i18n.dir() === "rtl";
+
+  const fontFamily = isRTL
+    ? "'IBMPlexArabic', 'Inter', sans-serif"
+    : "'Inter', 'Montserrat', sans-serif";
+
+  // ✅ Base style مشترك لكل أنواع التوست
+  const baseToastStyle: React.CSSProperties = {
+    background: "rgba(255,255,255,0.85)",
+    color: "#1a1a1a",
+    borderRadius: "16px",
+    padding: "14px 18px",
+    fontSize: "14px",
+    fontWeight: "500",
+    fontFamily,
+    direction: isRTL ? "rtl" : "ltr",
+    textAlign: isRTL ? "right" : "left",
+    width: "fit-content",
+    maxWidth: "360px",
+    minWidth: "280px",
+    backdropFilter: "blur(16px) saturate(180%)",
+    WebkitBackdropFilter: "blur(16px) saturate(180%)",
+    border: "1px solid rgba(255,255,255,0.5)",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+  };
 
   return (
     <Provider store={store}>
       <Toaster
-        position={toastPosition}
+        position="top-center"
+        containerStyle={{ top: 18 }}
         toastOptions={{
-          duration: 3000,
-          style: {
-            background: "#1a1a1a",
-            color: "#fff",
-            borderRadius: "12px",
-            padding: "12px 20px",
-            fontSize: "14px",
-          },
+          duration: 3500,
+          // ✅ style الافتراضي للتوست العادي
+          style: baseToastStyle,
           success: {
-            iconTheme: {
-              primary: "#22c55e",
-              secondary: "#fff",
+            duration: 3000,
+            iconTheme: { primary: "#16a34a", secondary: "transparent" },
+            // ✅ spread الـ base أولاً ثم override الألوان فقط
+            style: {
+              ...baseToastStyle,
+              background: "rgba(220,252,231,0.88)",
+              color: "#14532d",
+              border: "1px solid rgba(34,197,94,0.3)",
             },
           },
           error: {
-            iconTheme: {
-              primary: "#ef4444",
-              secondary: "#fff",
+            duration: 4500,
+            iconTheme: { primary: "#dc2626", secondary: "transparent" },
+            // ✅ spread الـ base أولاً ثم override الألوان فقط
+            style: {
+              ...baseToastStyle,
+              background: "rgba(254,226,226,0.88)",
+              color: "#7f1d1d",
+              border: "1px solid rgba(239,68,68,0.3)",
             },
           },
         }}
@@ -83,7 +117,9 @@ const RootWrapper = () => {
   );
 };
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+ReactDOM.createRoot(
+  document.getElementById("root")!
+).render(
   <React.StrictMode>
     <RootWrapper />
   </React.StrictMode>

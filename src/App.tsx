@@ -44,6 +44,7 @@ const router = createBrowserRouter([
 ]);
 
 const WhatsAppButton = () => {
+
   const phoneNumber = "201024230577";
   const message = encodeURIComponent("مرحباً! أريد الاستفسار عن منتجاتكم 🛍️");
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
