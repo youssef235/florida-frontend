@@ -2,12 +2,14 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { HiOutlineHeart } from "react-icons/hi2";
+import { useTranslation } from "react-i18next";
 
 import { useAppDispatch, useAppSelector } from "../hooks";
 import { fetchWishlist, removeFromWishlist } from "../features/wishlist/wishlistSlice";
 import ProductItem from "../components/ProductItem";
 
 const WishlistPage = () => {
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const { items, loading, error } = useAppSelector((state) => state.wishlist);
 
@@ -19,24 +21,35 @@ const WishlistPage = () => {
     if (error) toast.error(error);
   }, [error]);
 
+  const handleRemove = async (productId: string) => {
+    await dispatch(removeFromWishlist(productId));
+    toast.success(t("wishlist.removed"));
+  };
+
   return (
     <div className="min-h-screen bg-white px-4 sm:px-6 lg:px-10 py-8">
       <div className="max-w-[1600px] mx-auto">
         <div className="flex items-center gap-3 mb-8">
           <HiOutlineHeart className="text-2xl" />
-          <h1 className="text-2xl sm:text-3xl font-semibold">Wishlist</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold">
+            {t("wishlist.title")}
+          </h1>
         </div>
 
         {loading ? (
-          <div className="text-center py-20 text-gray-500">Loading wishlist...</div>
+          <div className="text-center py-20 text-gray-500">
+            {t("wishlist.loading")}
+          </div>
         ) : items.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-500 mb-4">Your wishlist is empty.</p>
+            <p className="text-gray-500 mb-4">
+              {t("wishlist.empty")}
+            </p>
             <Link
               to="/shop"
               className="inline-flex items-center justify-center px-6 py-3 bg-black text-white rounded-full text-sm uppercase tracking-widest"
             >
-              Continue Shopping
+              {t("wishlist.continue_shopping")}
             </Link>
           </div>
         ) : (
@@ -55,10 +68,7 @@ const WishlistPage = () => {
                 />
 
                 <button
-                  onClick={async () => {
-                    await dispatch(removeFromWishlist(product.id));
-                    toast.success("Removed from wishlist");
-                  }}
+                  onClick={() => handleRemove(product.id)}
                   className="absolute top-3 right-3 z-20 bg-white/95 hover:bg-white shadow-md rounded-full p-2 transition-all"
                 >
                   <HiOutlineHeart className="text-red-500 text-lg" />

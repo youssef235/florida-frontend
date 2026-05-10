@@ -20,6 +20,7 @@ import { useAppDispatch, useAppSelector } from "../hooks";
 import customFetch from "../axios/custom";
 import { Dropdown } from "../components";
 import { useImageUrl } from "../hooks/useImageUrl";
+import { useTranslation } from "react-i18next";
 
 const SingleProduct = () => {
   const [singleProduct, setSingleProduct] = useState<any>(null);
@@ -27,10 +28,13 @@ const SingleProduct = () => {
   const [selectedColor, setSelectedColor] = useState<any>(null);
   const [selectedPriceTag, setSelectedPriceTag] = useState<any>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+
   const params = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
   const { isLoading } = useAppSelector((state) => state.cart);
   const { items: wishlistItems } = useAppSelector((state) => state.wishlist);
+
+  const { t } = useTranslation();
 
   const dragX = useMotionValue(0);
 
@@ -45,20 +49,19 @@ const SingleProduct = () => {
         const response = await customFetch.get(`/products/${params.id}`);
         const product = response.data;
         setSingleProduct(product);
-        // اختر أول سعر تلقائياً
         if (product.priceTags?.length > 0) {
           setSelectedPriceTag(product.priceTags[0]);
         }
       } catch (error) {
         console.error(error);
-        toast.error("Error fetching product");
+        toast.error(t("product.error_fetching"));
       }
     };
 
     if (params.id) fetchSingleProduct();
     dispatch(fetchWishlist());
     window.scrollTo(0, 0);
-  }, [params.id, dispatch]);
+  }, [params.id, dispatch, t]);
 
   const nextSlide = () => {
     setCurrentIndex((prev) =>
@@ -78,53 +81,49 @@ const SingleProduct = () => {
     else if (x >= 50) prevSlide();
   };
 
-const handleAddToCart = async () => {
-  // إجبار اختيار المقاس
-  if (singleProduct.sizes?.length > 0 && !selectedSize) {
-    toast.error("Please select a size", {
-      style: {
-        borderRadius: "0",
-        background: "#000",
-        color: "#fff",
-        fontSize: "11px",
-      },
-    });
-    return;
-  }
+  const handleAddToCart = async () => {
+    if (singleProduct.sizes?.length > 0 && !selectedSize) {
+      toast.error(t("product.select_size"), {
+        style: {
+          borderRadius: "0",
+          background: "#000",
+          color: "#fff",
+          fontSize: "11px",
+        },
+      });
+      return;
+    }
 
-  // إجبار اختيار اللون
-  if (singleProduct.colors?.length > 0 && !selectedColor) {
-    toast.error("Please select a color", {
-      style: {
-        borderRadius: "0",
-        background: "#000",
-        color: "#fff",
-        fontSize: "11px",
-      },
-    });
-    return;
-  }
+    if (singleProduct.colors?.length > 0 && !selectedColor) {
+      toast.error(t("product.select_color"), {
+        style: {
+          borderRadius: "0",
+          background: "#000",
+          color: "#fff",
+          fontSize: "11px",
+        },
+      });
+      return;
+    }
 
-  dispatch(
-    addProductToTheCart({
-      id:
-        singleProduct._id +
-        (selectedSize || "") +
-        (selectedColor?.hex || ""),
-      productId: singleProduct._id,
-      priceTag: selectedPriceTag?._id,
-      title: singleProduct.name,
-      price: selectedPriceTag?.price,
-      quantity: 1,
-      image: singleProduct.images?.[0],
-      size: selectedSize,
-      color: selectedColor?.name || "Standard",
-    })
-  );
+    dispatch(
+      addProductToTheCart({
+        id: singleProduct._id + (selectedSize || "") + (selectedColor?.hex || ""),
+        productId: singleProduct._id,
+        priceTag: selectedPriceTag?._id,
+        title: singleProduct.name,
+        price: selectedPriceTag?.price,
+        quantity: 1,
+        image: singleProduct.images?.[0],
+        size: selectedSize,
+        color: selectedColor?.name || "Standard",
+      })
+    );
 
-  await dispatch(syncCart());
-  toast.success("Added to Bag");
-};
+    await dispatch(syncCart());
+    toast.success(t("product.added_to_bag"));
+  };
+
   const toggleWishlist = async () => {
     if (!params.id) return;
     if (isWishlisted) {
@@ -137,7 +136,7 @@ const handleAddToCart = async () => {
 
   if (!singleProduct) return (
     <div className="h-screen w-full flex items-center justify-center text-gray-400 uppercase tracking-widest text-xs">
-      Loading Product...
+      {t("product.loading")}
     </div>
   );
 
@@ -214,7 +213,7 @@ const handleAddToCart = async () => {
             </button>
           </div>
 
-          {/* ── الأسعار ── */}
+          {/* الأسعار */}
           {hasPriceTags && (
             <div className="mb-6">
               {singleProduct.priceTags.length === 1 ? (
@@ -241,14 +240,12 @@ const handleAddToCart = async () => {
             </div>
           )}
 
-          {/* ── المقاسات ── */}
+          {/* المقاسات */}
           {hasSizes && (
             <div className="mb-8">
               <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-wider mb-3 text-gray-500">
-                <span>Select Size</span>
-                {selectedSize && (
-                  <span className="text-black font-bold">{selectedSize}</span>
-                )}
+                <span>{t("product.select_size")}</span>
+                {selectedSize && <span className="text-black font-bold">{selectedSize}</span>}
               </div>
               <div className="flex flex-wrap gap-2">
                 {singleProduct.sizes.map((s: string) => (
@@ -268,14 +265,11 @@ const handleAddToCart = async () => {
             </div>
           )}
 
-          {/* ── الألوان ── */}
+          {/* الألوان */}
           {hasColors && (
             <div className="mb-8">
               <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-wider mb-3 text-gray-500">
-                <span>Select Color</span>
-                {selectedColor && (
-                  <span className="text-black font-bold"></span>
-                )}
+                <span>{t("product.select_color")}</span>
               </div>
               <div className="flex flex-wrap gap-3">
                 {singleProduct.colors.map((color: any) => (
@@ -303,14 +297,15 @@ const handleAddToCart = async () => {
           )}
 
           <div className="border-t border-gray-100 pt-6 space-y-8">
-            <Dropdown dropdownTitle="Product Details">
+            <Dropdown dropdownTitle={t("product.product_details")}>
               <div className="py-3 text-sm text-gray-600 leading-relaxed font-light">
-                {singleProduct.description || "A premium essential designed for maximum comfort and style."}
+                {singleProduct.description || t("product.default_description")}
               </div>
             </Dropdown>
-            <Dropdown dropdownTitle="Shipping & Returns">
+
+            <Dropdown dropdownTitle={t("product.shipping_returns")}>
               <div className="py-3 text-xs text-gray-500 uppercase tracking-widest leading-loose">
-                Free shipping on orders above 2500 EGP. Returns within 14 days.
+                {t("product.shipping_text")}
               </div>
             </Dropdown>
           </div>
@@ -322,7 +317,7 @@ const handleAddToCart = async () => {
               className="w-full bg-black text-white h-14 rounded-full flex items-center justify-center gap-3 hover:bg-gray-900 active:scale-95 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <span className="text-xs font-bold uppercase tracking-[0.15em]">
-                {isLoading ? "Loading..." : "Add To Bag"}
+                {isLoading ? t("product.loading") : t("product.add_to_bag")}
               </span>
               <HiOutlineShoppingBag className="w-4 h-4" />
             </button>
@@ -333,7 +328,9 @@ const handleAddToCart = async () => {
       {/* بار الموبايل السفلي */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 px-4 py-3 bg-white/95 backdrop-blur-lg border-t border-gray-100 z-[99] flex gap-3 items-center shadow-lg">
         <div className="flex flex-col justify-center min-w-[100px]">
-          <span className="text-[10px] text-gray-400 uppercase font-bold tracking-tight">Total Price</span>
+          <span className="text-[10px] text-gray-400 uppercase font-bold tracking-tight">
+            {t("product.total_price")}
+          </span>
           <span className="text-sm font-semibold text-gray-900">
             {selectedPriceTag?.price?.toLocaleString() ?? singleProduct.priceTags?.[0]?.price?.toLocaleString()} EGP
           </span>
@@ -344,7 +341,7 @@ const handleAddToCart = async () => {
           className="flex-1 bg-black text-white h-14 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-transform disabled:opacity-60 disabled:cursor-not-allowed shadow-md"
         >
           <span className="text-xs font-bold uppercase tracking-[0.15em]">
-            {isLoading ? "Loading..." : "Add To Bag"}
+            {isLoading ? t("product.loading") : t("product.add_to_bag")}
           </span>
           <HiOutlineShoppingBag className="w-4 h-4" />
         </button>

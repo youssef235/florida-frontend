@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useAppSelector } from "../hooks";
+import { useTranslation } from "react-i18next";
 import {
   ProductGrid,
   ProductGridWrapper,
@@ -16,33 +17,36 @@ interface Category {
 
 const ShopPageContent = ({
   category: initialCategory,
-  page: initialPage
+  page: initialPage,
 }: {
   category: string;
-  page: number
+  page: number;
 }) => {
+  const { t } = useTranslation();
+
   const [categories, setCategories] = useState<Category[]>([]);
-  const [activeCategory, setActiveCategory] = useState(initialCategory || "all");
+  const [activeCategory, setActiveCategory] = useState(
+    initialCategory || "all"
+  );
   const [sortCriteria, setSortCriteria] = useState<string>("default");
   const [currentPage, setCurrentPage] = useState(initialPage || 1);
-  const [priceRange, setPriceRange] = useState<{ min?: number; max?: number }>({});
+  const [priceRange, setPriceRange] = useState<{ min?: number; max?: number }>(
+    {}
+  );
   const [isLoadingCats, setIsLoadingCats] = useState(true);
 
   const { totalProducts } = useAppSelector((state) => state.shop);
 
-  // تحديث الحالة عند تغيير الـ URL (مثلاً عند الضغط على تصنيف من القائمة الجانبية أو الهيدر)
   useEffect(() => {
     setActiveCategory(initialCategory || "all");
     setCurrentPage(initialPage || 1);
   }, [initialCategory, initialPage]);
 
-  // جلب التصنيفات من السيرفر
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         setIsLoadingCats(true);
-        // تأكد من صحة الرابط الخاص بالـ API بتاعك
-const response = await customFetch.get("/categories");
+        const response = await customFetch.get("/categories");
         setCategories(response.data.data || response.data);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
@@ -53,19 +57,16 @@ const response = await customFetch.get("/categories");
     fetchCategories();
   }, []);
 
-  // دالة التعامل مع تغيير التصنيف لضمان إعادة الصفحة لـ 1
   const handleCategoryChange = (catName: string) => {
     setActiveCategory(catName);
     setCurrentPage(1);
   };
 
-  // دالة التعامل مع تغيير السعر
   const handlePriceChange = (range: { min?: number; max?: number }) => {
     setPriceRange(range);
     setCurrentPage(1);
   };
 
-  // دالة التعامل مع الترتيب
   const handleSortChange = (val: string) => {
     setSortCriteria(val);
     setCurrentPage(1);
@@ -73,7 +74,7 @@ const response = await customFetch.get("/categories");
 
   return (
     <main className="min-h-screen bg-[#fafafa]">
-      {/* 1. قسم الفلاتر - Sticky & Mobile Ready */}
+      {/* Filters */}
       <ShopFilterAndSort
         sortCriteria={sortCriteria}
         setSortCriteria={handleSortChange}
@@ -85,36 +86,42 @@ const response = await customFetch.get("/categories");
         totalProducts={totalProducts}
       />
 
-      {/* 2. محتوى المنتجات */}
+      {/* Content */}
       <div className="max-w-[1800px] mx-auto px-4 md:px-8">
         
-        {/* شريط حالة البحث الصغير (اختياري للروقان) */}
+        {/* Active Filters Bar */}
         {(activeCategory !== "all" || priceRange.min !== undefined) && (
           <div className="mt-6 flex flex-wrap gap-2 items-center animate-fadeIn">
-            <span className="text-[11px] font-bold uppercase text-gray-400">Filters:</span>
+            
+            <span className="text-[11px] font-bold uppercase text-gray-400">
+              {t("shop.filters")}
+            </span>
+
             {activeCategory !== "all" && (
               <span className="bg-white border border-gray-200 px-3 py-1 rounded-full text-[10px] font-bold">
-                Category: {activeCategory}
+                {t("shop.category")}: {activeCategory}
               </span>
             )}
+
             {priceRange.min !== undefined && (
               <span className="bg-white border border-gray-200 px-3 py-1 rounded-full text-[10px] font-bold">
-                Price Filter Active
+                {t("shop.price_filter_active")}
               </span>
             )}
-            <button 
+
+            <button
               onClick={() => {
                 setActiveCategory("all");
                 setPriceRange({});
               }}
               className="text-[10px] font-bold text-red-500 underline ml-2"
             >
-              Clear All
+              {t("shop.clear_all")}
             </button>
           </div>
         )}
 
-        {/* شبكة المنتجات */}
+        {/* Products */}
         <div className="mt-8 md:mt-12">
           <ProductGridWrapper
             sortCriteria={sortCriteria}
@@ -122,14 +129,15 @@ const response = await customFetch.get("/categories");
             minPrice={priceRange.min}
             maxPrice={priceRange.max}
             page={currentPage}
-            limit={12} // رقم مناسب للـ Grid في الموبايل والديسكتوب
+            limit={12}
           >
             <ProductGrid variant="detailed" />
           </ProductGridWrapper>
         </div>
 
-        {/* 3. الترقيم (Pagination) */}
-<div className="mt-8 md:mt-12 mb-10 md:mb-16 py-4 md:py-6 border-t border-gray-100 flex justify-center">          <ShowingPagination
+        {/* Pagination */}
+        <div className="mt-8 md:mt-12 mb-10 md:mb-16 py-4 md:py-6 border-t border-gray-100 flex justify-center">
+          <ShowingPagination
             page={currentPage}
             category={activeCategory}
             setCurrentPage={setCurrentPage}

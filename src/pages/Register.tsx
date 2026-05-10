@@ -3,9 +3,12 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import customFetch from "../axios/custom";
 import { checkRegisterFormData } from "../utils/checkRegisterFormData";
+import { useTranslation } from "react-i18next";
 import logo from "/assets/logo.jpg";
 
 const Register = () => {
+  const { t } = useTranslation();
+
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -29,12 +32,13 @@ const Register = () => {
       );
 
       if (response.status === 201) {
-        toast.success("User registered successfully");
+        toast.success(t("auth.register_success"));
         navigate("/login");
       }
     } catch (error: any) {
       const message =
-        error.response?.data?.message || "Registration failed";
+        error.response?.data?.message || t("auth.register_failed");
+
       toast.error(Array.isArray(message) ? message[0] : message);
     }
   };
@@ -44,8 +48,9 @@ const Register = () => {
 
       <div className="w-full flex flex-col items-center">
 
-        {/* Logo with loader */}
-<div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-6 mt-4">
+        {/* LOGO */}
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 mb-6 mt-4">
+
           {!imageLoaded && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin"></div>
@@ -61,9 +66,10 @@ const Register = () => {
               ${imageLoaded ? "opacity-100" : "opacity-0"}
             `}
           />
+
         </div>
 
-        {/* Card */}
+        {/* CARD */}
         <form
           onSubmit={handleRegister}
           className="
@@ -77,81 +83,86 @@ const Register = () => {
           "
         >
 
-          {/* Title */}
+          {/* TITLE */}
           <h2 className="text-center text-3xl sm:text-4xl font-semibold text-slate-900 tracking-tight">
-            Create Account
+            {t("auth.create_account")}
           </h2>
 
           <p className="text-center text-slate-500 text-sm sm:text-base">
-            Join us and start shopping
+            {t("auth.join_us")}
           </p>
 
-          {/* Inputs */}
+          {/* INPUTS */}
           <div className="flex flex-col gap-4">
 
+            {/* FIRST NAME */}
             <div>
               <label className="text-sm text-slate-700 font-medium">
-                First Name
+                {t("auth.first_name")}
               </label>
               <input
                 type="text"
                 name="name"
-                placeholder="Enter first name"
+                placeholder={t("auth.first_name_placeholder")}
                 className="h-12 mt-1 px-4 w-full rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:border-slate-400 transition"
               />
             </div>
 
+            {/* LAST NAME */}
             <div>
               <label className="text-sm text-slate-700 font-medium">
-                Last Name
+                {t("auth.last_name")}
               </label>
               <input
                 type="text"
                 name="lastname"
-                placeholder="Enter last name"
+                placeholder={t("auth.last_name_placeholder")}
                 className="h-12 mt-1 px-4 w-full rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:border-slate-400 transition"
               />
             </div>
 
+            {/* EMAIL */}
             <div>
               <label className="text-sm text-slate-700 font-medium">
-                Email
+                {t("auth.email")}
               </label>
               <input
                 type="email"
                 name="email"
-                placeholder="Enter email"
+                placeholder={t("auth.email_placeholder")}
                 className="h-12 mt-1 px-4 w-full rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:border-slate-400 transition"
               />
             </div>
 
+            {/* PASSWORD */}
             <div>
               <label className="text-sm text-slate-700 font-medium">
-                Password
+                {t("auth.password")}
               </label>
               <input
                 type="password"
                 name="password"
-                placeholder="Enter password"
+                placeholder={t("auth.password_placeholder")}
                 className="h-12 mt-1 px-4 w-full rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:border-slate-400 transition"
               />
             </div>
 
+            {/* CONFIRM PASSWORD */}
             <div>
               <label className="text-sm text-slate-700 font-medium">
-                Confirm Password
+                {t("auth.confirm_password")}
               </label>
               <input
                 type="password"
                 name="confirmPassword"
-                placeholder="Confirm password"
+                placeholder={t("auth.confirm_password_placeholder")}
                 className="h-12 mt-1 px-4 w-full rounded-xl border border-slate-200 bg-slate-50 outline-none focus:bg-white focus:border-slate-400 transition"
               />
             </div>
 
           </div>
 
-          {/* Button */}
+          {/* BUTTON */}
           <button
             type="submit"
             className="
@@ -162,15 +173,21 @@ const Register = () => {
               shadow-lg shadow-slate-900/20
             "
           >
-            Create Account
+            {t("auth.create_account_btn")}
           </button>
 
-          {/* Login link */}
+          {/* LOGIN LINK */}
           <div className="text-center text-sm text-slate-500">
-            Already have an account?{" "}
-            <Link to="/login" className="text-slate-900 font-semibold hover:underline">
-              Login
+
+            {t("auth.have_account")}{" "}
+
+            <Link
+              to="/login"
+              className="text-slate-900 font-semibold hover:underline"
+            >
+              {t("auth.login")}
             </Link>
+
           </div>
 
         </form>

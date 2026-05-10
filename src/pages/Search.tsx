@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ProductGrid,
   ProductGridWrapper,
@@ -8,13 +9,14 @@ import { useSearchParams } from "react-router-dom";
 import { HiOutlineMagnifyingGlass } from "react-icons/hi2";
 
 const Search = () => {
+  const { t } = useTranslation();
+
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [currentPage, setCurrentPage] = useState<number>(
     parseInt(searchParams.get("page") || "1")
   );
 
-  // search input state
   const [searchValue, setSearchValue] = useState(
     searchParams.get("query") || ""
   );
@@ -57,7 +59,6 @@ const Search = () => {
 
           {/* Title */}
           <div className="mb-4">
-
             <h1
               className="
                 text-2xl
@@ -68,9 +69,8 @@ const Search = () => {
                 text-slate-900
               "
             >
-              Search Products
+              {t("search.title")}
             </h1>
-
           </div>
 
           {/* Search Box */}
@@ -106,7 +106,6 @@ const Search = () => {
                 transition-all
               "
             >
-
               <HiOutlineMagnifyingGlass
                 className="
                   text-slate-400
@@ -118,7 +117,7 @@ const Search = () => {
 
               <input
                 type="text"
-                placeholder="Search products..."
+                placeholder={t("search.placeholder")}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
                 className="
@@ -133,7 +132,6 @@ const Search = () => {
                   placeholder:text-slate-400
                 "
               />
-
             </div>
 
             {/* Search Button */}
@@ -158,7 +156,7 @@ const Search = () => {
                 sm:min-w-[110px]
               "
             >
-              Search
+              {t("search.button")}
             </button>
 
           </div>

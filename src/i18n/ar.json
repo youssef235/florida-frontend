@@ -5,7 +5,107 @@
     "subtitle": "تشكيلة عالية الجودة",
     "shop_now": "تسوق الآن",
     "see_collection": "عرض التشكيلة"
+
   },
+  "product": {
+    "error_fetching": "حدث خطأ أثناء تحميل المنتج",
+    "loading": "جاري التحميل...",
+    "select_size": "اختر المقاس",
+    "select_color": "اختر اللون",
+    "product_details": "تفاصيل المنتج",
+    "shipping_returns": "الشحن والإرجاع",
+    "default_description": "منتج فاخر مصمم لتوفير أقصى درجات الراحة والأناقة.",
+    "shipping_text": "شحن مجاني على الطلبات التي تزيد عن 2500 جنيه مصري. الإرجاع خلال 14 يوم.",
+    "total_price": "السعر الإجمالي",
+    "add_to_bag": "أضف إلى السلة",
+    "added_to_bag": "تمت الإضافة إلى السلة"
+  },
+  "order": {
+  "back": "رجوع للطلبات",
+  "details_title": "تفاصيل الطلب",
+  "items_title": "المنتجات",
+  "product": "المنتج",
+  "qty": "الكمية",
+  "price": "السعر",
+  "total": "الإجمالي",
+  "address": "عنوان التوصيل",
+  "summary": "ملخص الطلب",
+  "subtotal": "الإجمالي الفرعي",
+  "shipping": "الشحن",
+  "tax": "الضريبة",
+  "free": "مجاني",
+  "currency": "ج.م",
+  "unknown": "غير معروف"
+},
+"auth": {
+  "welcome": "مرحبًا بعودتك",
+  "subtitle": "سجّل الدخول للمتابعة",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "email_placeholder": "أدخل بريدك الإلكتروني",
+  "password_placeholder": "أدخل كلمة المرور",
+  "sign_in": "تسجيل الدخول",
+  "no_account": "ليس لديك حساب؟",
+  "create_one": "إنشاء حساب",
+  "welcome_back": "مرحبًا بعودتك",
+  "invalid_credentials": "بيانات الدخول غير صحيحة",
+   "create_account": "إنشاء حساب جديد",
+  "join_us": "انضم إلينا وابدأ التسوق",
+  "first_name": "الاسم الأول",
+  "last_name": "اسم العائلة",
+  "email": "البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "confirm_password": "تأكيد كلمة المرور",
+
+  "first_name_placeholder": "أدخل الاسم الأول",
+  "last_name_placeholder": "أدخل اسم العائلة",
+  "email_placeholder": "أدخل البريد الإلكتروني",
+  "password_placeholder": "أدخل كلمة المرور",
+  "confirm_password_placeholder": "أعد إدخال كلمة المرور",
+
+  "create_account_btn": "إنشاء الحساب",
+  "have_account": "لديك حساب بالفعل؟",
+  "login": "تسجيل الدخول",
+
+  "register_success": "تم إنشاء الحساب بنجاح",
+  "register_failed": "فشل إنشاء الحساب"
+},
+
+  "orderConfirmation": {
+    "title": "شكراً لك!",
+    "subtitle": "تم تأكيد طلبك وسيتم شحنه قريباً. لقد أرسلنا بريداً إلكترونياً للتأكيد مع جميع التفاصيل.",
+    "email": {
+      "title": "تأكيد البريد الإلكتروني",
+      "description": "تم إرسال إيصال مفصل إلى عنوان بريدك الإلكتروني."
+    },
+    "shipping": {
+      "title": "شحن سريع",
+      "description": "سيتم معالجة طلبك وشحنه خلال 1-2 أيام عمل."
+    },
+    "buttons": {
+      "continueShopping": "مواصلة التسوق",
+      "viewOrders": "عرض سجل الطلبات"
+    },
+    "trust": {
+      "secure": "دفع آمن",
+      "returns": "إرجاع سهل",
+      "support": "دعم على مدار الساعة"
+    }
+  },
+
+
+  "orders": {
+  "title": "سجل الطلبات",
+  "order": "طلب",
+  "plural": "طلبات",
+  "no_orders": "لا توجد طلبات حتى الآن",
+  "empty_sub": "ستظهر طلباتك هنا بعد إتمام عملية الشراء",
+  "item": "منتج",
+  "items_plural": "منتجات",
+  "unknown": "غير معروف",
+  "tap_view": "اضغط لعرض تفاصيل الطلب",
+  "view_details": "عرض التفاصيل"
+},
    "sidebar": {
     "home": "الرئيسية",
     "shop": "المتجر",
@@ -19,10 +119,113 @@
     "logout_success": "تم تسجيل الخروج بنجاح",
     "footer": "© 2024 جميع الحقوق محفوظة"
   },
+  "sale": {
+    "season_sale": "تخفيضات الموسم",
+    "limited_time_offers": "عروض محدودة الوقت",
+    "view_all_sale": "عرض كل التخفيضات"
+  },
+  "footer": {
+    "description": "أزياء فاخرة مصممة لأولئك الذين يعرفون أسلوبهم الخاص.",
+    "client_service": "خدمة العملاء",
+    "after_sale_service": "خدمة ما بعد البيع",
+    "free_insurance": "تأمين مجاني",
+    "track_order": "تتبع طلبك",
+    "returns_exchanges": "الإرجاع والاستبدال",
+    "our_brand": "علامتنا التجارية",
+    "the_company": "الشركة",
+    "the_excellence": "التميز",
+    "international_awards": "الجوائز الدولية",
+    "our_story": "قصتنا",
+    "collections": "المجموعات",
+    "special_edition": "إصدار خاص",
+    "summer_edition": "إصدار الصيف",
+    "unique_collection": "مجموعة فريدة",
+    "new_arrivals": "وصل حديثاً",
+    "contact_us": "تواصل معنا",
+    "worldwide": "جميع أنحاء العالم / العربية",
+    "copyright": "© 2024 FLORIDA. جميع الحقوق محفوظة.",
+    "cookie_policy": "سياسة ملفات تعريف الارتباط",
+    "privacy_policy": "سياسة الخصوصية",
+    "legal_notes": "ملاحظات قانونية"
+  },
+  "cart": {
+    "shopping_bag": "حقيبة التسوق",
+    "continue_shopping": "مواصلة التسوق",
+    "loading": "جاري تحميل السلة...",
+    "empty_title": "حقيبتك فارغة",
+    "empty_sub": "يبدو أنك لم تضف أي منتجات إلى حقيبتك بعد.",
+    "start_shopping": "ابدأ التسوق",
+    "order_summary": "ملخص الطلب",
+    "free_shipping_applied": "تم تطبيق الشحن المجاني!",
+    "subtotal": "المجموع الفرعي",
+    "shipping": "الشحن",
+    "tax": "الضريبة (14%)",
+    "total": "الإجمالي",
+    "free": "مجاني",
+    "proceed_checkout": "الانتقال للدفع",
+    "checkout_disabled": "أضف منتجات للمتابعة",
+    "remove": "حذف",
+    "size": "المقاس",
+    "decrease_quantity": "تقليل الكمية",
+    "increase_quantity": "زيادة الكمية",
+    "quantity": "الكمية"
+  },
+"checkout": {
+  "title": "إتمام الطلب",
+  "items": "منتجات",
+  "delivery_information": "معلومات التوصيل",
+  "first_name": "الاسم الأول *",
+  "last_name": "الاسم الأخير *",
+  "address": "العنوان *",
+  "city": "المدينة *",
+  "postal_code": "الرمز البريدي *",
+  "phone_number": "رقم الهاتف *",
+  "payment_method": "طريقة الدفع",
+  "cash_on_delivery": "الدفع عند الاستلام",
+  "pay_when_arrives": "ادفع عند وصول الطلب",
+  "your_order": "طلبك",
+  "qty": "الكمية",
+  "placing_order": "جاري إتمام الطلب...",
+  "place_order": "تأكيد الطلب",
+  "agree_terms": "بتأكيدك الطلب فأنت توافق على الشروط والأحكام",
+  "empty_cart": "سلتك فارغة",
+  "fill_all_fields": "يرجى ملء جميع الحقول المطلوبة",
+  "order_success": "تم تقديم الطلب بنجاح!",
+  "order_error": "حدث خطأ، يرجى المحاولة مرة أخرى"
+},
+"search": {
+  "title": "ابحث عن المنتجات",
+  "placeholder": "ابحث عن المنتجات...",
+  "button": "بحث"
+},
+"wishlist": {
+  "title": "المفضلة",
+  "loading": "جاري تحميل المفضلة...",
+  "empty": "قائمة المفضلة فارغة.",
+  "continue_shopping": "متابعة التسوق",
+  "removed": "تمت إزالته من المفضلة"
+},
+  "shop": {
+    "the_gallery": "المعرض",
+        "filter": "تصفية",
+    "items": "منتج",
+    "all": "الكل",
+    "sort_new_in": "الترتيب: الأحدث",
+    "sort_price_low_high": "الترتيب: السعر من الأقل إلى الأعلى",
+    "sort_price_high_low": "الترتيب: السعر من الأعلى إلى الأقل",
+    "under_500": "أقل من 500",
+    "range_500_1500": "500 - 1500",
+    "above_1500": "1500 فما فوق",
+      "filters": "الفلاتر",
+  "category": "التصنيف",
+  "price_filter_active": "فلتر السعر مفعل",
+  "clear_all": "مسح الكل"
+  },
   "home": {
     "new_arrivals": "وصل حديثاً",
     "view_all": "عرض الكل"
   },
+  "our_collections": "تـــشكــيلاتـــنــا",
   "add_to_cart": "أضف إلى السلة",
   "shopping_bag": "سلة التسوق",
   "continue_shopping": "متابعة التسوق",

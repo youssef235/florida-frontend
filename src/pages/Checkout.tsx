@@ -5,12 +5,16 @@ import toast from "react-hot-toast";
 import customFetch from "../axios/custom";
 import { clearCart, syncCart } from "../features/cart/cartSlice";
 import { useImageUrl } from "../hooks/useImageUrl";
+import { useTranslation } from "react-i18next";
 
 const Checkout = () => {
+  const { t } = useTranslation();
+  
   const { productsInCart, subtotal } = useAppSelector((state) => state.cart);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "wallet">("cash");
 
   const [form, setForm] = useState({
     firstName: "", lastName: "",
@@ -26,12 +30,16 @@ const Checkout = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (productsInCart.length === 0) { toast.error("Your bag is empty"); return; }
+    if (productsInCart.length === 0) { 
+      toast.error(t("checkout.empty_cart") || "سلتك فارغة"); 
+      return; 
+    }
     if (!form.firstName || !form.lastName || !form.addressLineOne || !form.city || !form.zipCode || !form.contactNumber) {
-      toast.error("Please fill all required fields");
+      toast.error(t("checkout.fill_all_fields") || "يرجى ملء جميع الحقول المطلوبة");
       return;
     }
 
+    // Cash on Delivery
     setLoading(true);
     try {
       const orderItems = productsInCart.map((p) => ({
@@ -41,7 +49,6 @@ const Checkout = () => {
         quantity: p.quantity,
       }));
 
-// ✅ عدّل handleSubmit بعد نجاح الـ request
       await customFetch.post("/orders", {
         orderItems,
         deliveryInfo: form,
@@ -49,34 +56,33 @@ const Checkout = () => {
       });
 
       dispatch(clearCart());
-      await dispatch(syncCart()); // ✅ يفضي الكارت من الباك إند كمان
-      toast.success("Order placed successfully!");
-      navigate("/order-confirmation");
-
+      await dispatch(syncCart());
+      toast.success(t("checkout.order_success") || "تم تقديم الطلب بنجاح!");
       navigate("/order-confirmation");
     } catch {
-      toast.error("Something went wrong, please try again");
+      toast.error(t("checkout.order_error") || "حدث خطأ، يرجى المحاولة مرة أخرى");
     } finally {
       setLoading(false);
     }
   };
-const CartItemImage = ({
-  image,
-  title,
-}: {
-  image?: string;
-  title: string;
-}) => {
-  const { src } = useImageUrl(image || "");
 
-  return (
-    <img
-      src={src}
-      alt={title}
-      className="co-item-img"
-    />
-  );
-};
+  const CartItemImage = ({
+    image,
+    title,
+  }: {
+    image?: string;
+    title: string;
+  }) => {
+    const { src } = useImageUrl(image || "");
+    return (
+      <img
+        src={src}
+        alt={title}
+        className="co-item-img"
+      />
+    );
+  };
+
   return (
     <>
       <style>{`
@@ -119,9 +125,11 @@ const CartItemImage = ({
 
           {/* Header */}
           <div style={{ marginBottom: "2.5rem" }}>
-            <div className="co-title" style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", lineHeight: 1 }}>Checkout</div>
+            <div className="co-title" style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", lineHeight: 1 }}>
+              {t("checkout.title") || "Checkout"}
+            </div>
             <div style={{ fontSize: "0.82rem", color: "#AAA", marginTop: "0.4rem", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-              {productsInCart.length} item{productsInCart.length !== 1 ? "s" : ""} · EGP {subtotal.toFixed(0)}
+              {productsInCart.length} {t("checkout.items")} · EGP {subtotal.toFixed(0)}
             </div>
           </div>
 
@@ -134,44 +142,60 @@ const CartItemImage = ({
 
                 {/* Delivery */}
                 <div className="co-card">
-                  <div className="co-section-title">Delivery Information</div>
+                  <div className="co-section-title">{t("checkout.delivery_information") || "Delivery Information"}</div>
                   <div className="co-grid2">
                     <div className="co-field">
-                      <label className="co-label">First Name *</label>
+                      <label className="co-label">{t("checkout.first_name") || "First Name *"}</label>
                       <input className="co-input" name="firstName" placeholder="Ahmed" value={form.firstName} onChange={handleChange} required />
                     </div>
                     <div className="co-field">
-                      <label className="co-label">Last Name *</label>
+                      <label className="co-label">{t("checkout.last_name") || "Last Name *"}</label>
                       <input className="co-input" name="lastName" placeholder="Mohamed" value={form.lastName} onChange={handleChange} required />
                     </div>
                   </div>
                   <div className="co-field">
-                    <label className="co-label">Address *</label>
+                    <label className="co-label">{t("checkout.address") || "Address *"}</label>
                     <input className="co-input" name="addressLineOne" placeholder="123 El Tahrir Square" value={form.addressLineOne} onChange={handleChange} required />
                   </div>
                   <div className="co-grid2">
                     <div className="co-field">
-                      <label className="co-label">City *</label>
+                      <label className="co-label">{t("checkout.city") || "City *"}</label>
                       <input className="co-input" name="city" placeholder="Cairo" value={form.city} onChange={handleChange} required />
                     </div>
                     <div className="co-field">
-                      <label className="co-label">Postal Code *</label>
+                      <label className="co-label">{t("checkout.postal_code") || "Postal Code *"}</label>
                       <input className="co-input" name="zipCode" placeholder="11511" value={form.zipCode} onChange={handleChange} required />
                     </div>
                   </div>
                   <div className="co-field" style={{ marginBottom: 0 }}>
-                    <label className="co-label">Phone Number *</label>
+                    <label className="co-label">{t("checkout.phone_number") || "Phone Number *"}</label>
                     <input className="co-input" name="contactNumber" placeholder="+20 10 0000 0000" value={form.contactNumber} onChange={handleChange} required />
                   </div>
                 </div>
 
-                {/* Payment note */}
-                <div className="co-card" style={{ background: "#0D0D0D", color: "#fff" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                {/* Payment Method */}
+                <div className="co-card">
+                  <div className="co-section-title">{t("checkout.payment_method") || "Payment Method"}</div>
+
+                  <div
+                    onClick={() => setPaymentMethod("cash")}
+                    style={{
+                      display: "flex", alignItems: "center", gap: "0.75rem",
+                      background: paymentMethod === "cash" ? "#0D0D0D" : "#F7F5F2",
+                      color: paymentMethod === "cash" ? "#fff" : "#0D0D0D",
+                      borderRadius: 14, padding: "1rem 1.25rem", cursor: "pointer",
+                      marginBottom: "0.75rem", border: "1px solid rgba(0,0,0,0.08)",
+                      transition: "all 0.2s"
+                    }}
+                  >
                     <div style={{ fontSize: "1.5rem" }}>🔒</div>
                     <div>
-                      <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "0.95rem", marginBottom: "0.2rem" }}>Cash on Delivery</div>
-                      <div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.5)", fontWeight: 300 }}>Pay when your order arrives at your door</div>
+                      <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "0.95rem", marginBottom: "0.2rem" }}>
+                        {t("checkout.cash_on_delivery") || "Cash on Delivery"}
+                      </div>
+                      <div style={{ fontSize: "0.8rem", opacity: 0.5, fontWeight: 300 }}>
+                        {t("checkout.pay_when_arrives") || "Pay when your order arrives"}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -184,17 +208,18 @@ const CartItemImage = ({
 
                   {/* Items */}
                   <div className="co-card">
-                    <div className="co-section-title">Your Order</div>
+                    <div className="co-section-title">{t("checkout.your_order") || "Your Order"}</div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "1.5rem" }}>
                       {productsInCart.map((p) => (
                         <div key={p.id} style={{ display: "flex", gap: "0.85rem", alignItems: "center" }}>
-                          <CartItemImage
-                         image={p?.image}
-  title={p.title}
-                          />
+                          <CartItemImage image={p?.image} title={p.title} />
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 600, fontSize: "0.88rem", color: "#0D0D0D", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{p.title}</div>
-                            <div style={{ fontSize: "0.75rem", color: "#AAA", marginTop: "0.15rem" }}>{p.size} · {p.color} · Qty {p.quantity}</div>
+                            <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 600, fontSize: "0.88rem", color: "#0D0D0D", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                              {p.title}
+                            </div>
+                            <div style={{ fontSize: "0.75rem", color: "#AAA", marginTop: "0.15rem" }}>
+                              {p.size} · {p.color} · {t("checkout.qty") || "Qty"} {p.quantity}
+                            </div>
                           </div>
                           <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "0.9rem", color: "#0D0D0D", flexShrink: 0 }}>
                             EGP {(p.price * p.quantity).toFixed(0)}
@@ -205,24 +230,32 @@ const CartItemImage = ({
 
                     <hr className="co-divider" />
 
-                    <div className="co-row"><span>Subtotal</span><span className="co-row-val">EGP {subtotal.toFixed(0)}</span></div>
-                    <div className="co-row"><span>Shipping</span><span className="co-row-val" style={shipping === 0 ? { color: "#5FD87D" } : {}}>{shipping === 0 ? "Free" : `EGP ${shipping}`}</span></div>
-                    <div className="co-row" style={{ marginBottom: 0 }}><span>Tax (14%)</span><span className="co-row-val">EGP {tax.toFixed(0)}</span></div>
+                    <div className="co-row"><span>{t("cart.subtotal")}</span><span className="co-row-val">EGP {subtotal.toFixed(0)}</span></div>
+                    <div className="co-row"><span>{t("cart.shipping")}</span><span className="co-row-val" style={shipping === 0 ? { color: "#5FD87D" } : {}}>{shipping === 0 ? t("cart.free") : `EGP ${shipping}`}</span></div>
+                    <div className="co-row" style={{ marginBottom: 0 }}><span>{t("cart.tax")}</span><span className="co-row-val">EGP {tax.toFixed(0)}</span></div>
 
                     <hr className="co-divider" />
 
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-                      <div className="co-total-label">Total</div>
+                      <div className="co-total-label">{t("cart.total")}</div>
                       <div className="co-total-val">EGP {total.toFixed(0)}</div>
                     </div>
                   </div>
 
-                  <button type="submit" className="co-btn" disabled={loading || productsInCart.length === 0}>
-                    {loading ? "Placing Order..." : `Place Order · EGP ${total.toFixed(0)}`}
+                  <button
+                    type="button"
+                    className="co-btn"
+                    disabled={loading || productsInCart.length === 0}
+                    onClick={handleSubmit}
+                  >
+                    {loading 
+                      ? (t("checkout.placing_order") || "Placing Order...") 
+                      : `${t("checkout.place_order") || "Place Order"} · EGP ${total.toFixed(0)}`
+                    }
                   </button>
 
                   <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#BBB", letterSpacing: "0.05em" }}>
-                    By placing your order you agree to our terms & conditions
+                    {t("checkout.agree_terms") || "By placing your order you agree to our terms & conditions"}
                   </p>
                 </div>
               </div>

@@ -1,12 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap');
 
-/* 1. تعريف خط IBM Plex Sans Arabic بمختلف أوزانه */
+/* ============================================
+   1. FONTS DEFINITIONS
+   ============================================ */
+
 @font-face {
   font-family: 'IBMPlexArabic';
   src: url('/assets/fonts/IBMPlexSansArabic-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
+  size-adjust: 100%;
+  ascent-override: 90%;
+  descent-override: 20%;
 }
 
 @font-face {
@@ -15,6 +21,9 @@
   font-weight: 600;
   font-style: normal;
   font-display: swap;
+  size-adjust: 100%;
+  ascent-override: 90%;
+  descent-override: 20%;
 }
 
 @font-face {
@@ -23,41 +32,99 @@
   font-weight: 700;
   font-style: normal;
   font-display: swap;
+  size-adjust: 100%;
+  ascent-override: 90%;
+  descent-override: 20%;
 }
+
+/* ============================================
+   2. TAILWIND DIRECTIVES
+   ============================================ */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   3. BASE STYLES
+   ============================================ */
+
 @layer base {
+  html {
+    /* Prevent scrollbar jump */
+    overflow-y: scroll;
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    /* Smooth opacity transition for language change */
+    transition: opacity 0.2s ease-in-out;
+  }
+
   body {
-    /* الخط الافتراضي للإنجليزي */
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', 'Montserrat', sans-serif;
     background-color: #fafafa;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     color: #1a1a1a;
+    /* Prevent layout shift */
+    text-rendering: optimizeLegibility;
   }
 
-  /* 2. تغيير الخط للعربي فقط عند وجود كلاس lang-ar بدون قلب الاتجاه */
-  body.lang-ar,
-  body.lang-ar h1, 
-  body.lang-ar h2, 
-  body.lang-ar h3, 
-  body.lang-ar h4, 
-  body.lang-ar h5, 
+  /* Default LTR direction */
+  html[dir="ltr"] body,
+  body.dir-ltr {
+    direction: ltr;
+  }
+
+  /* RTL direction */
+  html[dir="rtl"] body,
+  body.dir-rtl {
+    direction: rtl;
+  }
+
+  /* Smooth transitions for direction changes */
+  .dir-ltr,
+  .dir-rtl {
+    transition: padding 0.3s ease, margin 0.3s ease;
+  }
+
+  /* ============================================
+     4. ARABIC FONT SWITCHING
+     ============================================ */
+
+  /* When language is Arabic - switch to Arabic font */
+  html[dir="rtl"] body,
+  body.lang-ar {
+    font-family: 'IBMPlexArabic', 'Inter', sans-serif;
+  }
+
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3,
+  html[dir="rtl"] h4,
+  html[dir="rtl"] h5,
+  html[dir="rtl"] h6,
+  html[dir="rtl"] .logo-font,
+  body.lang-ar h1,
+  body.lang-ar h2,
+  body.lang-ar h3,
+  body.lang-ar h4,
+  body.lang-ar h5,
   body.lang-ar h6,
   body.lang-ar .logo-font {
-    font-family: 'IBMPlexArabic', sans-serif !important;
+    font-family: 'IBMPlexArabic', 'Montserrat', sans-serif !important;
   }
 
+  /* Default headings font */
   h1, h2, h3, h4, h5, h6, .logo-font {
     font-family: 'Montserrat', sans-serif;
   }
 }
 
-/* تحسين الـ Banners */
+/* ============================================
+   5. BANNERS
+   ============================================ */
+
 .banner {
   height: 100svh;
   min-height: unset;
@@ -83,7 +150,7 @@
 }
 
 .shop-banner {
-  min-height: 400px; 
+  min-height: 400px;
   background: linear-gradient(
       rgba(0, 0, 0, 0.2),
       rgba(0, 0, 0, 0.2)
@@ -93,24 +160,67 @@
   background-position: center;
 }
 
-/* Animations - تم تثبيت الاتجاه ليكون دائماً من اليسار */
-.sidebar-enter {
+/* ============================================
+   6. SIDEBAR ANIMATIONS
+   ============================================ */
+
+/* LTR Sidebar - slides from left */
+html[dir="ltr"] .sidebar-enter,
+.dir-ltr .sidebar-enter {
   transform: translateX(-100%);
 }
 
-.sidebar-enter-active {
+html[dir="ltr"] .sidebar-enter-active,
+.dir-ltr .sidebar-enter-active {
   transform: translateX(0);
   transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Table Styles - المحاذاة تتبع الـ TextAlign المحدد في الـ body */
+html[dir="ltr"] .sidebar-exit,
+.dir-ltr .sidebar-exit {
+  transform: translateX(0);
+}
+
+html[dir="ltr"] .sidebar-exit-active,
+.dir-ltr .sidebar-exit-active {
+  transform: translateX(-100%);
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* RTL Sidebar - slides from right */
+html[dir="rtl"] .sidebar-enter,
+.dir-rtl .sidebar-enter {
+  transform: translateX(100%);
+}
+
+html[dir="rtl"] .sidebar-enter-active,
+.dir-rtl .sidebar-enter-active {
+  transform: translateX(0);
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html[dir="rtl"] .sidebar-exit,
+.dir-rtl .sidebar-exit {
+  transform: translateX(0);
+}
+
+html[dir="rtl"] .sidebar-exit-active,
+.dir-rtl .sidebar-exit-active {
+  transform: translateX(100%);
+  transition: transform 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================
+   7. TABLE STYLES
+   ============================================ */
+
 .singleOrder-table {
   @apply w-full border-collapse;
 }
 
 .singleOrder-table th {
   @apply bg-gray-50 text-gray-600 font-semibold py-3 px-4 border-b border-gray-100;
-  text-align: inherit; 
+  text-align: inherit;
 }
 
 .singleOrder-table td {
@@ -118,17 +228,182 @@
   text-align: inherit;
 }
 
-/* Custom Scrollbar */
+/* ============================================
+   8. CUSTOM SCROLLBAR
+   ============================================ */
+
 ::-webkit-scrollbar {
   width: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #d1d1d1;
   border-radius: 10px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #a1a1a1;
+}
+
+/* ============================================
+   9. LANGUAGE TOGGLE BUTTON STYLES
+   ============================================ */
+
+/* Light theme (default) */
+.language-toggle-btn {
+  @apply relative flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 bg-white border border-gray-200 rounded-full shadow-sm;
+  min-width: 36px;
+  justify-content: center;
+  transition: all 0.3s ease-out;
+}
+
+.language-toggle-btn:hover {
+  @apply shadow-md border-gray-300;
+}
+
+.language-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.language-toggle-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.language-toggle-btn .lang-text {
+  @apply relative overflow-hidden h-5 md:h-6 w-8 md:w-10;
+}
+
+.language-toggle-btn .lang-label {
+  @apply absolute inset-0 flex items-center justify-center text-sm md:text-base font-bold text-gray-800;
+  transition: transform 0.3s ease;
+}
+
+/* Dark theme (for black header) */
+.language-toggle-btn-dark {
+  @apply relative flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 bg-white/10 border border-white/20 rounded-full;
+  min-width: 80px;
+  justify-content: center;
+  transition: all 0.3s ease-out;
+}
+
+.language-toggle-btn-dark:hover {
+  @apply bg-white/20 border-white/40;
+}
+
+.language-toggle-btn-dark:active {
+  transform: scale(0.95);
+}
+
+.language-toggle-btn-dark:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.language-toggle-btn-dark .lang-text {
+  @apply relative overflow-hidden h-5 md:h-6 w-8 md:w-10;
+}
+
+.language-toggle-btn-dark .lang-label-dark {
+  @apply absolute inset-0 flex items-center justify-center text-sm md:text-base font-bold text-white;
+  transition: transform 0.3s ease;
+}
+
+/* ============================================
+   10. UTILITY CLASSES
+   ============================================ */
+
+/* Prevent layout shift containers */
+.no-shift {
+  min-height: 40px;
+  contain: layout;
+}
+
+/* Smooth image loading */
+.img-stable {
+  aspect-ratio: attr(width) / attr(height);
+  background-color: #f3f4f6;
+}
+
+/* RTL specific utilities */
+html[dir="rtl"] .rtl-flip,
+.dir-rtl .rtl-flip {
+  transform: scaleX(-1);
+}
+
+html[dir="rtl"] .rtl-space-x-reverse > :not([hidden]) ~ :not([hidden]),
+.dir-rtl .rtl-space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+/* ============================================
+   11. ACCESSIBILITY & FOCUS STYLES
+   ============================================ */
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #1a1a1a;
+  outline-offset: 2px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  html,
+  body,
+  .dir-ltr,
+  .dir-rtl,
+  .sidebar-enter-active,
+  .sidebar-exit-active,
+  .language-toggle-btn,
+  .language-toggle-btn-dark,
+  .language-toggle-btn .lang-label,
+  .language-toggle-btn-dark .lang-label-dark {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ============================================
+   12. MOBILE OPTIMIZATIONS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .banner {
+    background-position: center;
+  }
+
+  .language-toggle-btn,
+  .language-toggle-btn-dark {
+    min-width: 70px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .singleOrder-table th,
+  .singleOrder-table td {
+    @apply py-2 px-2;
+    font-size: 0.875rem;
+  }
+}
+
+/* ============================================
+   13. PRINT STYLES
+   ============================================ */
+
+@media print {
+  .banner,
+  .shop-banner,
+  .language-toggle-btn,
+  .language-toggle-btn-dark,
+  ::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
 }

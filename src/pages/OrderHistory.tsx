@@ -4,6 +4,7 @@ import {
   HiOutlineShoppingBag,
   HiOutlineChevronRight,
 } from "react-icons/hi2";
+import { useTranslation } from "react-i18next";
 
 export const loader = async () => {
   try {
@@ -25,13 +26,9 @@ const statusMap: Record<number, { label: string; color: string }> = {
   2: { label: "Delivered", color: "#10B981" },
   3: { label: "Cancelled", color: "#EF4444" },
 };
-const getCleanImageUrl = (imagePath: string): string => {
-  if (!imagePath) return "";
-  const baseUrl = customFetch.defaults.baseURL?.replace(/\/+$/, "") || "";
-  const cleanPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
-  return `${baseUrl}${cleanPath}`;
-};
+
 const OrderHistory = () => {
+  const { t } = useTranslation();
   const orders = useLoaderData() as any[];
 
   return (
@@ -49,9 +46,7 @@ const OrderHistory = () => {
           --shadow:0 10px 40px rgba(15,23,42,0.06);
         }
 
-        *{
-          box-sizing:border-box;
-        }
+        *{ box-sizing:border-box; }
 
         .oh-root{
           min-height:100vh;
@@ -70,8 +65,6 @@ const OrderHistory = () => {
             padding:2rem 1.5rem 5rem;
           }
         }
-
-        /* HEADER */
 
         .oh-header{
           position:sticky;
@@ -107,8 +100,6 @@ const OrderHistory = () => {
           font-weight:500;
         }
 
-        /* LIST */
-
         .oh-list{
           display:flex;
           flex-direction:column;
@@ -131,12 +122,8 @@ const OrderHistory = () => {
         }
 
         @media(min-width:640px){
-          .oh-card{
-            padding:1.3rem;
-          }
+          .oh-card{ padding:1.3rem; }
         }
-
-        /* TOP */
 
         .oh-top{
           display:flex;
@@ -161,8 +148,6 @@ const OrderHistory = () => {
           font-weight:500;
         }
 
-        /* BADGE */
-
         .oh-badge{
           display:inline-flex;
           align-items:center;
@@ -180,8 +165,6 @@ const OrderHistory = () => {
           border-radius:50%;
           flex-shrink:0;
         }
-
-        /* BOTTOM */
 
         .oh-bottom{
           display:flex;
@@ -211,8 +194,6 @@ const OrderHistory = () => {
           background:#000;
           transform:translateY(-2px);
         }
-
-        /* EMPTY */
 
         .oh-empty{
           background:rgba(255,255,255,0.95);
@@ -248,99 +229,69 @@ const OrderHistory = () => {
           line-height:1.7;
         }
 
-        /* MOBILE */
-
         @media(max-width:640px){
-
-          .oh-top{
-            flex-direction:column;
-            align-items:flex-start;
-          }
-
-          .oh-bottom{
-            flex-direction:column;
-            align-items:stretch;
-          }
-
-          .oh-link{
-            width:100%;
-            justify-content:center;
-          }
-
-          .oh-badge{
-            font-size:0.72rem;
-          }
-
+          .oh-top{ flex-direction:column; }
+          .oh-bottom{ flex-direction:column; }
+          .oh-link{ width:100%; justify-content:center; }
         }
       `}</style>
 
       <div className="oh-root">
-
         <div className="oh-container">
 
-          {/* Sticky Header */}
+          {/* HEADER */}
           <div className="oh-header">
-
             <div className="oh-title">
-              Order History
+              {t("orders.title")}
             </div>
 
             <div className="oh-sub">
-              {orders.length} order{orders.length !== 1 ? "s" : ""} placed
+              {orders.length} {t("orders.order")}
+              {orders.length !== 1 ? t("orders.plural") : ""}
             </div>
-
           </div>
 
-          {/* Empty State */}
+          {/* EMPTY */}
           {orders.length === 0 ? (
-
             <div className="oh-empty">
-
               <div className="oh-empty-icon">
                 <HiOutlineShoppingBag size={38} />
               </div>
 
               <div className="oh-empty-title">
-                No orders yet
+                {t("orders.no_orders")}
               </div>
 
               <p className="oh-empty-sub">
-                Your orders will appear here after checkout.
+                {t("orders.empty_sub")}
               </p>
-
             </div>
-
           ) : (
-
             <div className="oh-list">
 
               {orders.map((order: any) => {
                 const status =
                   statusMap[order.orderStatus] ?? {
-                    label: "Unknown",
+                    label: t("orders.unknown"),
                     color: "#94A3B8",
                   };
 
                 return (
-                  <div
-                    key={order._id}
-                    className="oh-card"
-                  >
+                  <div key={order._id} className="oh-card">
 
-                    {/* Top */}
                     <div className="oh-top">
 
                       <div>
-
                         <div className="oh-order-id">
                           Order #{order._id?.slice(0, 8).toUpperCase()}
                         </div>
 
                         <div className="oh-items">
-                          {order.orderItems?.length} item
-                          {order.orderItems?.length !== 1 ? "s" : ""}
+                          {order.orderItems?.length} {t("orders.item")}
+                          {order.orderItems?.length !== 1
+                            ? t("orders.items_plural")
+                            : ""}
                         </div>
-
                       </div>
 
                       <span
@@ -350,42 +301,31 @@ const OrderHistory = () => {
                           color: status.color,
                         }}
                       >
-
                         <span
                           className="oh-dot"
-                          style={{
-                            background: status.color,
-                          }}
+                          style={{ background: status.color }}
                         />
-
                         {status.label}
-
                       </span>
 
                     </div>
 
-                    {/* Bottom */}
                     <div className="oh-bottom">
 
-                      <div
-                        style={{
-                          color: "#64748b",
-                          fontSize: "0.82rem",
-                          fontWeight: 500,
-                        }}
-                      >
-                        Tap below to view order details
+                      <div style={{
+                        color: "#64748b",
+                        fontSize: "0.82rem",
+                        fontWeight: 500,
+                      }}>
+                        {t("orders.tap_view")}
                       </div>
 
                       <Link
                         to={`/order-history/${order._id}`}
                         className="oh-link"
                       >
-
-                        View Details
-
+                        {t("orders.view_details")}
                         <HiOutlineChevronRight size={16} />
-
                       </Link>
 
                     </div>
@@ -395,11 +335,9 @@ const OrderHistory = () => {
               })}
 
             </div>
-
           )}
 
         </div>
-
       </div>
     </>
   );

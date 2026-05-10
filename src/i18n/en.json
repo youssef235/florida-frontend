@@ -6,6 +6,7 @@
     "shop_now": "Shop Now",
     "see_collection": "See Collection"
   },
+
   "sidebar": {
     "home": "Home",
     "shop": "Shop",
@@ -19,10 +20,214 @@
     "logout_success": "Logged out successfully",
     "footer": "© 2024 All rights reserved"
   },
-  "home": {
-    "new_arrivals": "وصل حديثاً",
-    "view_all": "عرض الكل"
+    "cart": {
+    "shopping_bag": "Shopping Bag",
+    "continue_shopping": "Continue Shopping",
+    "loading": "Loading your cart...",
+    "empty_title": "Your Bag is Empty",
+    "empty_sub": "Looks like you haven't added anything to your bag yet.",
+    "start_shopping": "Start Shopping",
+    "order_summary": "Order Summary",
+    "free_shipping_applied": "Free shipping applied!",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "tax": "Tax (14%)",
+    "total": "Total",
+    "free": "Free",
+    "proceed_checkout": "Proceed to Checkout",
+    "checkout_disabled": "Add items to proceed",
+    "remove": "Remove",
+    "size": "Size",
+    "decrease_quantity": "Decrease quantity",
+    "increase_quantity": "Increase quantity",
+    "quantity": "Quantity"
   },
+
+  "home": {
+    "new_arrivals": "New Arrivals",
+    "view_all": "View All"
+  },
+    "our_collections": "Our Collections",
+
+  "sale": {
+    "season_sale": "Season Sale",
+    "limited_time_offers": "Limited time offers",
+    "view_all_sale": "View All Sale"
+  },
+
+  "shop": {
+    "filter": "Filter",
+    "items": "Items",
+    "all": "All",
+    "the_gallery": "The Gallery",
+    "sort_new_in": "Sort: New In",
+    "sort_price_low_high": "Sort: Price Low-High",
+    "sort_price_high_low": "Sort: Price High-Low",
+    "under_500": "Under 500",
+    "range_500_1500": "500 - 1500",
+    "above_1500": "1500+",
+     "filters": "Filters",
+  "category": "Category",
+  "price_filter_active": "Price Filter Active",
+  "clear_all": "Clear All"
+  },
+
+"search": {
+  "title": "Search Products",
+  "placeholder": "Search products...",
+  "button": "Search"
+},
+"wishlist": {
+  "title": "Wishlist",
+  "loading": "Loading wishlist...",
+  "empty": "Your wishlist is empty.",
+  "continue_shopping": "Continue Shopping",
+  "removed": "Removed from wishlist"
+},
+"order": {
+  "back": "Back to Orders",
+  "details_title": "Order Details",
+  "items_title": "Order Items",
+  "product": "Product",
+  "qty": "Qty",
+  "price": "Price",
+  "total": "Total",
+  "address": "Delivery Address",
+  "summary": "Order Summary",
+  "subtotal": "Subtotal",
+  "shipping": "Shipping",
+  "tax": "Tax",
+  "free": "Free",
+  "currency": "EGP",
+  "unknown": "Unknown"
+},
+"auth": {
+  "welcome": "Welcome Back",
+  "subtitle": "Login to continue shopping",
+  "email": "Email",
+  "password": "Password",
+  "email_placeholder": "Enter your email",
+  "password_placeholder": "Enter your password",
+  "sign_in": "Sign In",
+  "no_account": "Don’t have an account?",
+  "create_one": "Create one",
+  "welcome_back": "Welcome back",
+  "invalid_credentials": "Invalid credentials",
+    "create_account": "Create Account",
+  "join_us": "Join us and start shopping",
+  "first_name": "First Name",
+  "last_name": "Last Name",
+  "email": "Email",
+  "password": "Password",
+  "confirm_password": "Confirm Password",
+
+  "first_name_placeholder": "Enter first name",
+  "last_name_placeholder": "Enter last name",
+  "email_placeholder": "Enter email",
+  "password_placeholder": "Enter password",
+  "confirm_password_placeholder": "Confirm password",
+
+  "create_account_btn": "Create Account",
+  "have_account": "Already have an account?",
+  "login": "Login",
+
+  "register_success": "Account created successfully",
+  "register_failed": "Registration failed"
+},
+"orderConfirmation": {
+    "title": "Thank You!",
+    "subtitle": "Your order has been confirmed and will be shipped shortly. We've sent a confirmation email with all the details.",
+    "email": {
+      "title": "Email Confirmation",
+      "description": "A detailed receipt has been sent to your email address."
+    },
+    "shipping": {
+      "title": "Fast Shipping",
+      "description": "Your order will be processed and shipped within 1-2 business days."
+    },
+    "buttons": {
+      "continueShopping": "Continue Shopping",
+      "viewOrders": "View Order History"
+    },
+    "trust": {
+      "secure": "Secure Payment",
+      "returns": "Easy Returns",
+      "support": "24/7 Support"
+    }
+  },
+"orders": {
+  "title": "Order History",
+  "order": "order",
+  "plural": "s",
+  "no_orders": "No orders yet",
+  "empty_sub": "Your orders will appear here after checkout",
+  "item": "item",
+  "items_plural": "items",
+  "unknown": "Unknown",
+  "tap_view": "Tap below to view order details",
+  "view_details": "View Details"
+},
+"checkout": {
+  "title": "Checkout",
+  "items": "items",
+  "delivery_information": "Delivery Information",
+  "first_name": "First Name *",
+  "last_name": "Last Name *",
+  "address": "Address *",
+  "city": "City *",
+  "postal_code": "Postal Code *",
+  "phone_number": "Phone Number *",
+  "payment_method": "Payment Method",
+  "cash_on_delivery": "Cash on Delivery",
+  "pay_when_arrives": "Pay when your order arrives",
+  "your_order": "Your Order",
+  "qty": "Qty",
+  "placing_order": "Placing Order...",
+  "place_order": "Place Order",
+  "agree_terms": "By placing your order you agree to our terms & conditions",
+  "empty_cart": "Your bag is empty",
+  "fill_all_fields": "Please fill all required fields",
+  "order_success": "Order placed successfully!",
+  "order_error": "Something went wrong, please try again"
+},
+"product": {
+    "error_fetching": "Error fetching product",
+    "loading": "Loading...",
+    "select_size": "Select Size",
+    "select_color": "Select Color",
+    "product_details": "Product Details",
+    "shipping_returns": "Shipping & Returns",
+    "default_description": "A premium essential designed for maximum comfort and style.",
+    "shipping_text": "Free shipping on orders above 2500 EGP. Returns within 14 days.",
+    "total_price": "Total Price",
+    "add_to_bag": "Add To Bag",
+    "added_to_bag": "Added to Bag"
+  },
+  "footer": {
+    "description": "Luxury fashion crafted for those who define their own style.",
+    "client_service": "Client Service",
+    "after_sale_service": "After-sale Service",
+    "free_insurance": "Free Insurance",
+    "track_order": "Track Your Order",
+    "returns_exchanges": "Returns & Exchanges",
+    "our_brand": "Our Brand",
+    "the_company": "The Company",
+    "the_excellence": "The Excellence",
+    "international_awards": "International Awards",
+    "our_story": "Our Story",
+    "collections": "Collections",
+    "special_edition": "Special Edition",
+    "summer_edition": "Summer Edition",
+    "unique_collection": "Unique Collection",
+    "new_arrivals": "New Arrivals",
+    "contact_us": "Contact Us",
+    "worldwide": "Worldwide / English",
+    "copyright": "© 2024 FLORIDA. All rights reserved.",
+    "cookie_policy": "Cookie Policy",
+    "privacy_policy": "Privacy Policy",
+    "legal_notes": "Legal Notes"
+  },
+
   "add_to_cart": "Add to Cart",
   "shopping_bag": "Shopping Bag",
   "continue_shopping": "Continue Shopping",
