@@ -256,7 +256,7 @@ html[dir="rtl"] .sidebar-exit-active,
 /* Light theme (default) */
 .language-toggle-btn {
   @apply relative flex items-center gap-2 px-3 py-2 md:px-4 md:py-2.5 bg-white border border-gray-200 rounded-full shadow-sm;
-  min-width: 36px;
+  min-width: 80px;
   justify-content: center;
   transition: all 0.3s ease-out;
 }
@@ -406,4 +406,126 @@ a:focus-visible {
     background: white;
     color: black;
   }
+}
+
+
+/* ============================================
+   14. ORDER CONFIRMATION ANIMATIONS
+   ============================================ */
+
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
+
+/* Checkmark draw animation */
+@keyframes checkmark-draw {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.checkmark-animate {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: checkmark-draw 0.8s ease-out forwards;
+}
+
+/* Fade in up animation for content */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+/* Stagger children animations */
+.stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+
+
+/* ============================================
+   15. PRODUCT GALLERY STYLES
+   ============================================ */
+
+/* Hide scrollbar for thumbnails */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Lightbox animations */
+@keyframes lightbox-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.lightbox-image {
+  animation: lightbox-fade-in 0.3s ease-out;
+}
+
+/* Image zoom on hover (desktop) */
+@media (min-width: 1024px) {
+  .gallery-image:hover {
+    cursor: zoom-in;
+  }
+}
+
+/* Swipe indicator */
+.swipe-hint {
+  animation: swipe-hint 2s ease-in-out infinite;
+}
+
+@keyframes swipe-hint {
+  0%, 100% {
+    transform: translateX(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateX(10px);
+    opacity: 1;
+  }
+}
+
+/* Thumbnail active state glow */
+.thumbnail-active {
+  box-shadow: 0 0 0 2px #000, 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Mobile swipe area */
+.swipe-area {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-drag: none;
 }
