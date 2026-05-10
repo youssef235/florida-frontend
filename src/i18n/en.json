@@ -42,9 +42,12 @@
     "increase_quantity": "Increase quantity",
     "quantity": "Quantity"
   },
+  "all": "All",
 
   "home": {
     "new_arrivals": "New Arrivals",
+      "best_sellers": "Best Sellers",
+
     "view_all": "View All"
   },
     "our_collections": "Our Collections",

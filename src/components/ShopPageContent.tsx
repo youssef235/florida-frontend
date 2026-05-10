@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useAppSelector } from "../hooks";
 import { useTranslation } from "react-i18next";
 import {
@@ -10,11 +9,6 @@ import {
 } from "../components";
 import customFetch from "../axios/custom";
 
-interface Category {
-  _id: string;
-  name: string;
-}
-
 const ShopPageContent = ({
   category: initialCategory,
   page: initialPage,
@@ -24,43 +18,18 @@ const ShopPageContent = ({
 }) => {
   const { t } = useTranslation();
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [activeCategory, setActiveCategory] = useState(
-    initialCategory || "all"
-  );
-  const [sortCriteria, setSortCriteria] = useState<string>("default");
-  const [currentPage, setCurrentPage] = useState(initialPage || 1);
-  const [priceRange, setPriceRange] = useState<{ min?: number; max?: number }>(
-    {}
-  );
-  const [isLoadingCats, setIsLoadingCats] = useState(true);
+  const [activeCategory, setActiveCategory] = useState(initialCategory || "all");
+  const [sortCriteria, setSortCriteria]     = useState<string>("default");
+  const [currentPage, setCurrentPage]       = useState(initialPage || 1);
+  const [priceRange, setPriceRange]         = useState<{ min?: number; max?: number }>({});
 
   const { totalProducts } = useAppSelector((state) => state.shop);
 
+  /* sync when URL-driven props change (nav bar click) */
   useEffect(() => {
     setActiveCategory(initialCategory || "all");
     setCurrentPage(initialPage || 1);
   }, [initialCategory, initialPage]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setIsLoadingCats(true);
-        const response = await customFetch.get("/categories");
-        setCategories(response.data.data || response.data);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-      } finally {
-        setIsLoadingCats(false);
-      }
-    };
-    fetchCategories();
-  }, []);
-
-  const handleCategoryChange = (catName: string) => {
-    setActiveCategory(catName);
-    setCurrentPage(1);
-  };
 
   const handlePriceChange = (range: { min?: number; max?: number }) => {
     setPriceRange(range);
@@ -74,25 +43,21 @@ const ShopPageContent = ({
 
   return (
     <main className="min-h-screen bg-[#fafafa]">
-      {/* Filters */}
+
+      {/* Filters — no categories here, they live in the header nav bar */}
       <ShopFilterAndSort
         sortCriteria={sortCriteria}
         setSortCriteria={handleSortChange}
-        activeCategory={activeCategory}
-        setActiveCategory={handleCategoryChange}
-        categories={categories}
         priceRange={priceRange}
         setPriceRange={handlePriceChange}
         totalProducts={totalProducts}
       />
 
-      {/* Content */}
       <div className="max-w-[1800px] mx-auto px-4 md:px-8">
-        
-        {/* Active Filters Bar */}
+
+        {/* Active filters bar */}
         {(activeCategory !== "all" || priceRange.min !== undefined) && (
           <div className="mt-6 flex flex-wrap gap-2 items-center animate-fadeIn">
-            
             <span className="text-[11px] font-bold uppercase text-gray-400">
               {t("shop.filters")}
             </span>
@@ -111,7 +76,7 @@ const ShopPageContent = ({
 
             <button
               onClick={() => {
-                setActiveCategory("all");
+                setActiveCategory(t("all"));
                 setPriceRange({});
               }}
               className="text-[10px] font-bold text-red-500 underline ml-2"
@@ -143,6 +108,7 @@ const ShopPageContent = ({
             setCurrentPage={setCurrentPage}
           />
         </div>
+
       </div>
     </main>
   );

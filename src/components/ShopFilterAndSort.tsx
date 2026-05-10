@@ -6,33 +6,26 @@ import { HiOutlineAdjustmentsHorizontal } from "react-icons/hi2";
 interface ShopFilterAndSortProps {
   sortCriteria: string;
   setSortCriteria: (value: string) => void;
-  activeCategory: string;
-  setActiveCategory: (value: string) => void;
-  categories: { _id: string; name: string }[];
   priceRange: { min?: number; max?: number };
   setPriceRange: (range: { min?: number; max?: number }) => void;
   totalProducts: number;
 }
 
-const ShopFilterAndSort = ({ 
-  sortCriteria, 
-  setSortCriteria, 
-  activeCategory, 
-  setActiveCategory, 
-  categories, 
-  priceRange, 
-  setPriceRange, 
-  totalProducts 
+const ShopFilterAndSort = ({
+  sortCriteria,
+  setSortCriteria,
+  priceRange,
+  setPriceRange,
+  totalProducts,
 }: ShopFilterAndSortProps) => {
   const { t } = useTranslation();
   const { showingProducts } = useAppSelector((state) => state.shop);
 
   return (
-    <div className="w-full bg-white/90 backdrop-blur-xl border-b border-gray-100 sticky top-[73px] z-40"
->
+    <div className="w-full bg-white/90 backdrop-blur-xl border-b border-gray-100 sticky top-[73px] z-40">
       <div className="max-w-[1800px] mx-auto px-4">
-        
-        {/* الصف الأول: معلومات الفلترة والترتيب */}
+
+        {/* Sort + item count */}
         <div className="flex justify-between items-center py-4 border-b border-gray-50">
           <div className="flex items-center gap-2">
             <HiOutlineAdjustmentsHorizontal className="w-5 h-5 text-black" />
@@ -44,7 +37,7 @@ const ShopFilterAndSort = ({
             </span>
           </div>
 
-          <div className="relative group">
+          <div className="relative">
             <select
               className="appearance-none bg-transparent pr-6 text-[11px] font-black uppercase tracking-tighter outline-none cursor-pointer"
               onChange={(e) => setSortCriteria(e.target.value)}
@@ -60,51 +53,27 @@ const ShopFilterAndSort = ({
           </div>
         </div>
 
-        {/* الصف الثاني: التصنيفات كـ Slider للموبايل */}
-        <div className="flex overflow-x-auto gap-1 no-scrollbar py-3 -mx-4 px-4 scroll-smooth">
-          <button
-            onClick={() => setActiveCategory("all")}
-            className={`whitespace-nowrap px-6 py-2 text-[10px] font-bold uppercase transition-all duration-300
-              ${activeCategory === "all" 
-                ? "text-black border-b-2 border-black" 
-                : "text-gray-400 border-b-2 border-transparent"}`}
-          >
-            {t("shop.all")}
-          </button>
-          
-          {categories.map((cat) => (
-            <button
-              key={cat._id}
-              onClick={() => setActiveCategory(cat.name)}
-              className={`whitespace-nowrap px-6 py-2 text-[10px] font-bold uppercase transition-all duration-300
-                ${activeCategory === cat.name 
-                  ? "text-black border-b-2 border-black" 
-                  : "text-gray-400 border-b-2 border-transparent"}`}
-            >
-              {cat.name}
-            </button>
-          ))}
-        </div>
-
-        {/* الصف الثالث: فلاتر السعر السريعة */}
-        <div className="flex gap-4 py-2 overflow-x-auto no-scrollbar border-t border-gray-50">
+        {/* Price quick filters */}
+        <div className="flex gap-4 py-2 overflow-x-auto no-scrollbar">
           {[
-            { labelKey: "shop.under_500", min: 0, max: 500 },
-            { labelKey: "shop.range_500_1500", min: 500, max: 1500 },
-            { labelKey: "shop.above_1500", min: 1500, max: 100000 }
+            { labelKey: "shop.under_500",    min: 0,    max: 500    },
+            { labelKey: "shop.range_500_1500", min: 500,  max: 1500   },
+            { labelKey: "shop.above_1500",   min: 1500, max: 100000 },
           ].map((range, idx) => (
             <button
               key={idx}
               onClick={() => setPriceRange({ min: range.min, max: range.max })}
-              className={`text-[9px] font-medium uppercase tracking-widest whitespace-nowrap px-3 py-1 rounded-sm border
-                ${priceRange.min === range.min 
-                  ? "bg-black text-white border-black" 
-                  : "bg-white text-gray-400 border-gray-200"}`}
+              className={`text-[9px] font-medium uppercase tracking-widest whitespace-nowrap px-3 py-1 rounded-sm border transition-colors duration-150
+                ${priceRange.min === range.min
+                  ? "bg-black text-white border-black"
+                  : "bg-white text-gray-400 border-gray-200"
+                }`}
             >
               {t(range.labelKey)}
             </button>
           ))}
         </div>
+
       </div>
     </div>
   );
