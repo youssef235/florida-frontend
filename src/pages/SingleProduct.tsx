@@ -30,6 +30,14 @@ import { useTranslation } from "react-i18next";
 import { HiOutlineZoomIn } from "react-icons/hi";
 
 const SingleProduct = () => {
+
+    // ✅ إخفاء زر الواتساب في هذه الصفحة
+  useEffect(() => {
+    document.body.classList.add('hide-whatsapp');
+    return () => {
+      document.body.classList.remove('hide-whatsapp');
+    };
+  }, []);
   const [singleProduct, setSingleProduct] = useState<any>(null);
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedColor, setSelectedColor] = useState<any>(null);

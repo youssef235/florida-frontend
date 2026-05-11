@@ -90,48 +90,76 @@ const Checkout = () => {
     setExpandedMethod(expandedMethod === id ? null : id);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (productsInCart.length === 0) {
-      toast.error(t("checkout.empty_cart") || "سلتك فارغة");
-      return;
-    }
-    if (!form.firstName || !form.lastName || !form.addressLineOne || !form.city || !form.zipCode || !form.contactNumber) {
-      toast.error(t("checkout.fill_all_fields") || "يرجى ملء جميع الحقول المطلوبة");
-      return;
-    }
-    if (!paymentMethod) {
-      toast.error(lang === "ar" ? "يرجى اختيار طريقة الدفع" : "Please select a payment method");
-      return;
-    }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    setLoading(true);
-    try {
-      const orderItems = productsInCart.map((p) => ({
-        product: p.productId,
-        priceTag: p.priceTag,
-        price: p.price,
-        quantity: p.quantity,
-      }));
+  if (productsInCart.length === 0) {
+    toast.error("سلتك فارغة");
+    return;
+  }
 
-      await customFetch.post("/orders", {
-        orderItems,
-        deliveryInfo: form,
-        paymentMethod,
-        discount: 0,
-      });
+  if (!form.firstName || !form.lastName || !form.addressLineOne || !form.city || !form.contactNumber) {
+    toast.error("يرجى ملء جميع الحقول المطلوبة");
+    return;
+  }
+  if (!paymentMethod) {
+    toast.error("يرجى اختيار طريقة الدفع");
+    return;
+  }
 
-      dispatch(clearCart());
-      await dispatch(syncCart());
-      toast.success(t("checkout.order_success") || "تم تقديم الطلب بنجاح!");
-      navigate("/order-confirmation");
-    } catch {
-      toast.error(t("checkout.order_error") || "حدث خطأ، يرجى المحاولة مرة أخرى");
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
 
+  try {
+    const orderItems = productsInCart.map((p) => ({
+      product: p.productId,
+      priceTag: p.priceTag,
+      price: Number(p.price) || 0,
+      quantity: Number(p.quantity) || 1,
+      size: p.size || undefined,
+      color: p.color || undefined,
+    }));
+
+    const payload = {
+      orderItems,
+      deliveryInfo: {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        addressLineOne: form.addressLineOne,
+        city: form.city,
+        zipCode: form.zipCode || "",
+        contactNumber: form.contactNumber,
+      },
+      paymentMethod,
+      totalAmount: total,
+      isGuest: true,
+      discount: 0,
+    };
+
+    console.log("📤 Sending Order Payload:", payload);
+
+    const response = await customFetch.post("/orders", payload);
+
+    // ✅ حفظ contactNumber للـ Guest
+    localStorage.setItem('guestContactNumber', form.contactNumber);
+    // ✅ حفظ orderId الأخير
+    localStorage.setItem('lastOrderId', response.data.id);
+
+    dispatch(clearCart());
+    toast.success("تم تقديم الطلب بنجاح!");
+    navigate("/order-confirmation");
+
+  } catch (error: any) {
+    console.error("❌ Checkout Error:", error.response?.data || error);
+    
+    const message = error.response?.data?.message || 
+                   error.response?.data?.errors?.[0] || 
+                   "حدث خطأ أثناء إتمام الطلب";
+                   
+    toast.error(Array.isArray(message) ? message[0] : message);
+  } finally {
+    setLoading(false);
+  }
+};
   const CartItemImage = ({ image, title }: { image?: string; title: string }) => {
     const { src } = useImageUrl(image || "");
     return <img src={src} alt={title} className="co-item-img" />;

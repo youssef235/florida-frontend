@@ -133,12 +133,12 @@ const HorizontalProductScroll = ({
           </h2>
           <div className="w-6 h-[1.5px] bg-gray-300 mt-1" />
         </div>
-        <Link
+ {/*        <Link
           to={viewAllLink}
           className="text-[10px] uppercase tracking-widest text-gray-400 hover:text-black transition font-medium"
         >
           {t("home.view_all")}
-        </Link>
+        </Link> */}
       </div>
 
       {/* scroll track */}

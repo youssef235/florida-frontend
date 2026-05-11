@@ -1,22 +1,36 @@
-import { Link, useLoaderData, redirect } from "react-router-dom";
+import { Link, useLoaderData, redirect, useSearchParams } from "react-router-dom";
 import customFetch from "../axios/custom";
 import {
   HiOutlineShoppingBag,
   HiOutlineChevronRight,
+  HiOutlinePhone,
 } from "react-icons/hi2";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 
-export const loader = async () => {
+// ✅ Loader - لا Hooks هنا!
+export const loader = async ({ request }: { request: Request }) => {
+  const token = localStorage.getItem("token");
+  const url = new URL(request.url);
+  const contactNumber = url.searchParams.get("phone");
+
   try {
-    const token = localStorage.getItem("token");
+    if (token) {
+      const response = await customFetch.get("/orders", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return { orders: response.data ?? [], isGuest: false, contactNumber: null };
+    }
 
-    if (!token) return redirect("/login");
+    if (contactNumber) {
+      const response = await customFetch.get(`/orders/guest?contactNumber=${encodeURIComponent(contactNumber)}`);
+      return { orders: response.data ?? [], isGuest: true, contactNumber };
+    }
 
-    const response = await customFetch.get("/orders");
-
-    return response.data ?? [];
-  } catch {
-    return redirect("/login");
+    return { orders: [], isGuest: true, contactNumber: null };
+  } catch (error) {
+    console.error("Error loading orders:", error);
+    return { orders: [], isGuest: !token, contactNumber: null };
   }
 };
 
@@ -28,8 +42,22 @@ const statusMap: Record<number, { label: string; color: string }> = {
 };
 
 const OrderHistory = () => {
-  const { t } = useTranslation();
-  const orders = useLoaderData() as any[];
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language === "ar" ? "ar" : "en";
+  
+  // ✅ Hooks أولاً!
+  const [searchParams, setSearchParams] = useSearchParams();
+  const phoneParam = searchParams.get("phone");  // ✅ بعد التعريف
+  
+  const { orders, isGuest, contactNumber: initialPhone } = useLoaderData() as any;
+  const [searchPhone, setSearchPhone] = useState(initialPhone || "");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchPhone.trim()) {
+      setSearchParams({ phone: searchPhone.trim() });
+    }
+  };
 
   return (
     <>
@@ -229,6 +257,60 @@ const OrderHistory = () => {
           line-height:1.7;
         }
 
+        .guest-search {
+          background: rgba(255,255,255,0.95);
+          border: 1px solid rgba(226,232,240,0.8);
+          border-radius: 20px;
+          padding: 2rem;
+          margin-bottom: 2rem;
+          box-shadow: var(--shadow);
+        }
+
+        .guest-search-title {
+          font-family: 'Syne', sans-serif;
+          font-size: 1.2rem;
+          font-weight: 700;
+          color: var(--text);
+          margin-bottom: 1rem;
+        }
+
+        .guest-search-input {
+          width: 100%;
+          background: #fff;
+          border: 1px solid rgba(0,0,0,0.1);
+          border-radius: 12px;
+          padding: 0.85rem 1rem;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.95rem;
+          color: var(--text);
+          outline: none;
+          transition: border-color 0.2s, box-shadow 0.2s;
+          margin-bottom: 1rem;
+        }
+
+        .guest-search-input:focus {
+          border-color: #0f172a;
+          box-shadow: 0 0 0 3px rgba(15,23,42,0.06);
+        }
+
+        .guest-search-btn {
+          width: 100%;
+          background: #0f172a;
+          color: white;
+          border: none;
+          border-radius: 12px;
+          padding: 0.85rem;
+          font-family: 'Syne', sans-serif;
+          font-size: 0.9rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+
+        .guest-search-btn:hover {
+          background: #000;
+        }
+
         @media(max-width:640px){
           .oh-top{ flex-direction:column; }
           .oh-bottom{ flex-direction:column; }
@@ -242,14 +324,41 @@ const OrderHistory = () => {
           {/* HEADER */}
           <div className="oh-header">
             <div className="oh-title">
-              {t("orders.title")}
+              {isGuest ? (lang === "ar" ? "تتبع طلبك" : "Track Your Order") : t("orders.title")}
             </div>
 
             <div className="oh-sub">
-              {orders.length} {t("orders.order")}
-              {orders.length !== 1 ? t("orders.plural") : ""}
+              {isGuest 
+                ? (lang === "ar" ? "أدخل رقم هاتفك لعرض طلباتك" : "Enter your phone number to view your orders")
+                : `${orders.length} ${t("orders.order")}${orders.length !== 1 ? t("orders.plural") : ""}`
+              }
             </div>
           </div>
+
+          {/* Guest Search Form */}
+          {isGuest && (
+            <div className="guest-search">
+              <div className="guest-search-title">
+                {lang === "ar" ? "البحث عن طلباتك" : "Search Your Orders"}
+              </div>
+              <form onSubmit={handleSearch}>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                  <HiOutlinePhone size={20} color="#64748b" />
+                  <input
+                    type="tel"
+                    className="guest-search-input"
+                    placeholder={lang === "ar" ? "مثال: 01024230577" : "e.g. 01024230577"}
+                    value={searchPhone}
+                    onChange={(e) => setSearchPhone(e.target.value)}
+                    required
+                  />
+                </div>
+                <button type="submit" className="guest-search-btn">
+                  {lang === "ar" ? "بحث" : "Search"}
+                </button>
+              </form>
+            </div>
+          )}
 
           {/* EMPTY */}
           {orders.length === 0 ? (
@@ -259,11 +368,19 @@ const OrderHistory = () => {
               </div>
 
               <div className="oh-empty-title">
-                {t("orders.no_orders")}
+                {isGuest 
+                  ? (lang === "ar" ? "لا توجد طلبات" : "No Orders Found")
+                  : t("orders.no_orders")
+                }
               </div>
 
               <p className="oh-empty-sub">
-                {t("orders.empty_sub")}
+                {isGuest
+                  ? (lang === "ar" 
+                      ? "أدخل رقم هاتفك أعلاه للبحث عن طلباتك السابقة" 
+                      : "Enter your phone number above to search for your previous orders")
+                  : t("orders.empty_sub")
+                }
               </p>
             </div>
           ) : (
@@ -320,8 +437,9 @@ const OrderHistory = () => {
                         {t("orders.tap_view")}
                       </div>
 
-                      <Link
-                        to={`/order-history/${order._id}`}
+                      {/* ✅ className صحيح + phoneParam */}
+                      <Link 
+                        to={`/order-history/${order._id}${phoneParam ? `?phone=${encodeURIComponent(phoneParam)}` : ''}`} 
                         className="oh-link"
                       >
                         {t("orders.view_details")}

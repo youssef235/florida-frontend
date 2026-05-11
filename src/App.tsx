@@ -54,7 +54,7 @@ const WhatsAppButton = () => {
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-8 right-8 w-14 h-14 bg-[#0D0D0D] rounded-full flex items-center justify-center shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-200 z-[9999]"
+     className="whatsapp-float fixed bottom-8 right-8 w-14 h-14 bg-[#0D0D0D] rounded-full flex items-center justify-center shadow-lg hover:scale-110 hover:shadow-xl transition-all duration-200 z-[9999]"
       aria-label="Contact on WhatsApp"
     >
       <svg width="26" height="26" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">

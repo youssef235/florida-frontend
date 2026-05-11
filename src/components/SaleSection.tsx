@@ -22,9 +22,9 @@ const SaleSection = ({ products }: { products: any[] }) => {
     </p>
   </div>
   
-  <button className="text-[11px] uppercase border-b border-black pb-2 hover:text-red-600 hover:border-red-600 transition-colors">
+{/*   <button className="text-[11px] uppercase border-b border-black pb-2 hover:text-red-600 hover:border-red-600 transition-colors">
     {t("sale.view_all_sale")}
-  </button>
+  </button> */}
 </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-12">
         {saleProducts.map((product: any) => (

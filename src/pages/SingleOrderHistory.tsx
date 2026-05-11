@@ -3,9 +3,6 @@ import customFetch from "../axios/custom";
 import { useImageUrl } from "../hooks/useImageUrl";
 import { useTranslation } from "react-i18next";
 
-/**
- * مكون فرعي لعرض صورة المنتج باستخدام الـ Hook
- */
 const OrderProductImage = ({
   imagePath,
   alt,
@@ -28,16 +25,31 @@ const OrderProductImage = ({
   );
 };
 
-export const loader = async ({ params }: LoaderFunctionArgs) => {
+// ✅ Loader جديد يدعم المسجل والـ Guest
+export const loader = async ({ params, request }: LoaderFunctionArgs) => {
+  const token = localStorage.getItem("token");
+  const url = new URL(request.url);
+  const contactNumber = url.searchParams.get("phone");
+
   try {
-    const token = localStorage.getItem("token");
-    if (!token) return redirect("/login");
+    let allOrders = [];
 
-    const response = await customFetch.get(`/orders`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const allOrders = response.data;
+    if (token) {
+      // ✅ مسجل: يجلب كل طلباته
+      const response = await customFetch.get("/orders", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      allOrders = response.data ?? [];
+    } else if (contactNumber) {
+      // ✅ Guest: يبحث برقم الهاتف
+      const response = await customFetch.get(
+        `/orders/guest?contactNumber=${encodeURIComponent(contactNumber)}`
+      );
+      allOrders = response.data ?? [];
+    } else {
+      // ❌ لا token ولا contactNumber → ارجع للتاريخ
+      return redirect("/order-history");
+    }
 
     const singleOrder = allOrders.find((o: any) => o._id === params.id);
 

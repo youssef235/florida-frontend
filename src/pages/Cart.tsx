@@ -17,11 +17,24 @@ import {
   updateProductQuantity,
   syncCart,
   loadCart,
+  setCartFromBackend,
 } from "../features/cart/cartSlice";
 import { useImageUrl } from "../hooks/useImageUrl";
 
+/* ====================== GUEST CART HELPER ====================== */
+const loadGuestCart = (): any[] => {
+  try {
+    const saved = localStorage.getItem("guest_cart");
+    return saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    console.error("Failed to load guest cart", e);
+    return [];
+  }
+};
+/* ============================================================ */
+
 /**
- * مكون فرعي مخصص لعرض صورة المنتج داخل السلة
+ * مكون فرعي لعرض صورة المنتج
  */
 const CartItemImage = ({ imagePath, title }: { imagePath: string; title: string }) => {
   const { src, status } = useImageUrl(imagePath);
@@ -50,9 +63,15 @@ const Cart = () => {
   const { productsInCart, subtotal, isLoading } = useAppSelector((state) => state.cart);
   const { loginStatus } = useAppSelector((state) => state.auth);
 
+  // Load Cart - Support Guest & Logged-in
   useEffect(() => {
-    if (loginStatus && productsInCart.length === 0) {
+    if (loginStatus) {
       dispatch(loadCart());
+    } else {
+      const guestCart = loadGuestCart();
+      if (guestCart.length > 0) {
+        dispatch(setCartFromBackend(guestCart));
+      }
     }
   }, [loginStatus, dispatch]);
 

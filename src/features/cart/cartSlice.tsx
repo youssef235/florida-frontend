@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { addToCartApi, getCartApi, syncCartApi } from "../../data/cartApi";
 
-// cartSlice.ts
 export type ProductInCart = {
   id: string;
   productId: string;
@@ -10,7 +9,6 @@ export type ProductInCart = {
   price: number;
   quantity: number;
   image?: string;
-
   size?: string;
   color?: string;
   colorHex?: string;
@@ -20,180 +18,143 @@ type CartState = {
   productsInCart: ProductInCart[];
   subtotal: number;
   isLoading: boolean;
+  isGuest: boolean;
 };
 
 const initialState: CartState = {
   productsInCart: [],
   subtotal: 0,
   isLoading: false,
+  isGuest: true,
 };
 
-// ✅ يدعم _id و id في نفس الوقت
-const mapCartItem = (item: any): ProductInCart => {
-  const productId =
-    item.product?._id || item.product?.id;
+const CART_KEY = "guest_cart";
 
-  const size = item.size || "";
-
-  const color =
-    item.color?.name ||
-    item.color ||
-    "Standard";
-
-  const colorHex =
-    item.color?.hex ||
-    item.colorHex ||
-    "";
-
-  return {
-    id:
-      productId +
-      size +
-      color +
-      colorHex,
-
-    productId,
-    title: item.product?.name,
-    price: item.priceTag?.price,
-    quantity: item.quantity,
-
-    image:
-      item.product?.images?.[0],
-
-    priceTag:
-      item.priceTag?._id ||
-      item.priceTag?.id,
-
-    size,
-    color,
-    colorHex,
-  };
+const saveGuestCart = (cart: ProductInCart[]) => {
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
 };
+
+const loadGuestCart = (): ProductInCart[] => {
+  try {
+    const saved = localStorage.getItem(CART_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+};
+
+const mapCartItem = (item: any): ProductInCart => ({
+  id: item.id || (item.productId + (item.size || "") + (item.color || "")),
+  productId: item.product?._id || item.productId,
+  title: item.product?.name || item.title,
+  price: item.priceTag?.price || item.price,
+  quantity: item.quantity,
+  image: item.product?.images?.[0] || item.image,
+  priceTag: item.priceTag?._id || item.priceTag,
+  size: item.size,
+  color: item.color?.name || item.color || "Standard",
+  colorHex: item.color?.hex || item.colorHex,
+});
+
 export const loadCart = createAsyncThunk("cart/load", async () => {
   return await getCartApi();
 });
 
-export const syncCart = createAsyncThunk(
-  "cart/sync",
-  async (_, { getState }: any) => {
-    const state = getState();
-    const data = state.cart.productsInCart.map((p: ProductInCart) => ({
-      product: p.productId,
-      priceTag: p.priceTag,
-      quantity: p.quantity || 1,
-      size: p.size,    // ✅ أضف
-      color: p.color,  // ✅ أضف
-      colorHex: p.colorHex,  // ✅ أضف
-    }));
-    return await syncCartApi(data);
+export const syncCart = createAsyncThunk("cart/sync", async (_, { getState }) => {
+  const state = getState() as any;
+  const isLoggedIn = state.auth?.loginStatus || false;
+
+  if (!isLoggedIn) {
+    saveGuestCart(state.cart.productsInCart);
+    return null;
   }
-);
-export const addToCart = createAsyncThunk(
-  "cart/add",
-  async (item: { product: string; priceTag: string; quantity: number }) => {
-    return await addToCartApi(item);
-  }
-);
+
+  const data = state.cart.productsInCart.map((p: ProductInCart) => ({
+    product: p.productId,
+    priceTag: p.priceTag,
+    quantity: p.quantity,
+    size: p.size,
+    color: p.color,
+  }));
+
+  return await syncCartApi(data);
+});
 
 export const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
     addProductToTheCart: (state, action: PayloadAction<ProductInCart>) => {
-      const product = state.productsInCart.find(
-        (p) => p.id === action.payload.id
-      );
-      if (product) {
-        product.quantity += action.payload.quantity;
+      const existing = state.productsInCart.find(p => p.id === action.payload.id);
+      if (existing) {
+        existing.quantity += action.payload.quantity;
       } else {
         state.productsInCart.push(action.payload);
       }
       cartSlice.caseReducers.calculateTotalPrice(state);
+      saveGuestCart(state.productsInCart);
     },
 
     removeProductFromTheCart: (state, action: PayloadAction<{ id: string }>) => {
-      state.productsInCart = state.productsInCart.filter(
-        (p) => p.id !== action.payload.id
-      );
+      state.productsInCart = state.productsInCart.filter(p => p.id !== action.payload.id);
       cartSlice.caseReducers.calculateTotalPrice(state);
+      saveGuestCart(state.productsInCart);
     },
 
-    updateProductQuantity: (
-      state,
-      action: PayloadAction<{ id: string; quantity: number }>
-    ) => {
-      const product = state.productsInCart.find(
-        (p) => p.id === action.payload.id
-      );
-      if (product) {
-        product.quantity = Number(action.payload.quantity);
-      }
+    updateProductQuantity: (state, action: PayloadAction<{ id: string; quantity: number }>) => {
+      const product = state.productsInCart.find(p => p.id === action.payload.id);
+      if (product) product.quantity = action.payload.quantity;
       cartSlice.caseReducers.calculateTotalPrice(state);
+      saveGuestCart(state.productsInCart);
     },
 
     calculateTotalPrice: (state) => {
       state.subtotal = state.productsInCart.reduce((acc, p) => {
-        const price = Number(p.price) || 0;
-        const qty = Number(p.quantity) || 0;
-        return acc + price * qty;
+        return acc + (Number(p.price) || 0) * (Number(p.quantity) || 0);
       }, 0);
     },
 
     setCartFromBackend: (state, action: PayloadAction<ProductInCart[]>) => {
       state.productsInCart = action.payload;
+      state.isGuest = false;
       cartSlice.caseReducers.calculateTotalPrice(state);
+      localStorage.removeItem(CART_KEY);
+    },
+
+    mergeGuestCartToUser: (state, action: PayloadAction<ProductInCart[]>) => {
+      const userCart = action.payload;
+      const guestCart = [...state.productsInCart];
+
+      const merged = [...userCart];
+
+      guestCart.forEach(guest => {
+        const exists = merged.findIndex(item => item.id === guest.id);
+        if (exists !== -1) {
+          merged[exists].quantity += guest.quantity;
+        } else {
+          merged.push(guest);
+        }
+      });
+
+      state.productsInCart = merged;
+      state.isGuest = false;
+      cartSlice.caseReducers.calculateTotalPrice(state);
+      localStorage.removeItem(CART_KEY);
     },
 
     clearCart: (state) => {
       state.productsInCart = [];
       state.subtotal = 0;
+      localStorage.removeItem(CART_KEY);
     },
   },
 
   extraReducers: (builder) => {
-    // ─── loadCart ───────────────────────────────────────
-    builder.addCase(loadCart.pending, (state) => {
-      state.isLoading = true;
-    });
     builder.addCase(loadCart.fulfilled, (state, action) => {
       state.isLoading = false;
       if (action.payload?.data) {
         state.productsInCart = action.payload.data.map(mapCartItem);
-        cartSlice.caseReducers.calculateTotalPrice(state);
-      }
-    });
-    builder.addCase(loadCart.rejected, (state) => {
-      state.isLoading = false;
-    });
-
-    // ─── syncCart ───────────────────────────────────────
-    builder.addCase(syncCart.pending, (state) => {
-      state.isLoading = true;
-    });
-builder.addCase(syncCart.fulfilled, (state, action) => {
-  state.isLoading = false;
-  if (action.payload?.data) {
-    // ✅ deduplicate بالـ id
-    const seen = new Set<string>();
-    const unique = action.payload.data
-      .map(mapCartItem)
-      .filter((item: { id: string; }) => {
-        if (seen.has(item.id)) return false;
-        seen.add(item.id);
-        return true;
-      });
-    state.productsInCart = unique;
-    cartSlice.caseReducers.calculateTotalPrice(state);
-  }
-});
-    builder.addCase(syncCart.rejected, (state) => {
-      state.isLoading = false;
-    });
-
-    // ─── addToCart ──────────────────────────────────────
-    builder.addCase(addToCart.fulfilled, (state, action) => {
-      if (action.payload?.data) {
-        state.productsInCart = action.payload.data.map(mapCartItem);
+        state.isGuest = false;
         cartSlice.caseReducers.calculateTotalPrice(state);
       }
     });
@@ -204,8 +165,8 @@ export const {
   addProductToTheCart,
   removeProductFromTheCart,
   updateProductQuantity,
-  calculateTotalPrice,
   setCartFromBackend,
+  mergeGuestCartToUser,
   clearCart,
 } = cartSlice.actions;
 
