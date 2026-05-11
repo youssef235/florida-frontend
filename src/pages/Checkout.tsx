@@ -7,14 +7,71 @@ import { clearCart, syncCart } from "../features/cart/cartSlice";
 import { useImageUrl } from "../hooks/useImageUrl";
 import { useTranslation } from "react-i18next";
 
+type PaymentMethod = "vodafone" | "instapay";
+
+/* ── payment options config ── */
+const PAYMENT_OPTIONS = [
+  {
+    id: "vodafone" as PaymentMethod,
+    icon: "📱",
+    label: { ar: "فودافون كاش", en: "Vodafone Cash" },
+    number: "01024230577",   // ← ضع رقمك هنا
+    instructions: {
+      ar: [
+        "افتح تطبيق فودافون كاش",
+        "اختر «تحويل فوري»",
+        'أدخل الرقم: 010XXXXXXXX',
+        "أدخل المبلغ المطلوب",
+        "في خانة الملاحظات اكتب اسمك ورقم طلبك",
+        "أرسل لقطة الشاشة على الواتساب لتأكيد الطلب",
+      ],
+      en: [
+        "Open the Vodafone Cash app",
+        "Select 'Instant Transfer'",
+        "Enter the number: 010XXXXXXXX",
+        "Enter the required amount",
+        "In the notes field write your name and order number",
+        "Send a screenshot on WhatsApp to confirm your order",
+      ],
+    },
+  },
+  {
+    id: "instapay" as PaymentMethod,
+    icon: "💳",
+    label: { ar: "انستا باي", en: "InstaPay" },
+    number: "florida@instapay",   // ← ضع رقمك أو IPA هنا
+    instructions: {
+      ar: [
+        "افتح تطبيق انستا باي",
+        "اختر «ادفع» ثم «IPA Address»",
+        'أدخل: florida@instapay',
+        "أدخل المبلغ المطلوب",
+        "في خانة الوصف اكتب اسمك ورقم طلبك",
+        "أرسل لقطة الشاشة على الواتساب لتأكيد الطلب",
+      ],
+      en: [
+        "Open the InstaPay app",
+        "Select 'Pay' then 'IPA Address'",
+        "Enter: florida@instapay",
+        "Enter the required amount",
+        "In the description write your name and order number",
+        "Send a screenshot on WhatsApp to confirm your order",
+      ],
+    },
+  },
+];
+
 const Checkout = () => {
-  const { t } = useTranslation();
-  
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language === "ar" ? "ar" : "en";
+
   const { productsInCart, subtotal } = useAppSelector((state) => state.cart);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "wallet">("cash");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [expandedMethod, setExpandedMethod] = useState<PaymentMethod | null>(null);
 
   const [form, setForm] = useState({
     firstName: "", lastName: "",
@@ -22,24 +79,32 @@ const Checkout = () => {
   });
 
   const shipping = subtotal > 500 || subtotal === 0 ? 0 : 20;
-  const tax = subtotal * 0.14;
-  const total = subtotal + shipping + tax;
+  
+  const total = subtotal + shipping;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  const handleSelectMethod = (id: PaymentMethod) => {
+    setPaymentMethod(id);
+    setExpandedMethod(expandedMethod === id ? null : id);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (productsInCart.length === 0) { 
-      toast.error(t("checkout.empty_cart") || "سلتك فارغة"); 
-      return; 
+    if (productsInCart.length === 0) {
+      toast.error(t("checkout.empty_cart") || "سلتك فارغة");
+      return;
     }
     if (!form.firstName || !form.lastName || !form.addressLineOne || !form.city || !form.zipCode || !form.contactNumber) {
       toast.error(t("checkout.fill_all_fields") || "يرجى ملء جميع الحقول المطلوبة");
       return;
     }
+    if (!paymentMethod) {
+      toast.error(lang === "ar" ? "يرجى اختيار طريقة الدفع" : "Please select a payment method");
+      return;
+    }
 
-    // Cash on Delivery
     setLoading(true);
     try {
       const orderItems = productsInCart.map((p) => ({
@@ -52,6 +117,7 @@ const Checkout = () => {
       await customFetch.post("/orders", {
         orderItems,
         deliveryInfo: form,
+        paymentMethod,
         discount: 0,
       });
 
@@ -66,21 +132,9 @@ const Checkout = () => {
     }
   };
 
-  const CartItemImage = ({
-    image,
-    title,
-  }: {
-    image?: string;
-    title: string;
-  }) => {
+  const CartItemImage = ({ image, title }: { image?: string; title: string }) => {
     const { src } = useImageUrl(image || "");
-    return (
-      <img
-        src={src}
-        alt={title}
-        className="co-item-img"
-      />
-    );
+    return <img src={src} alt={title} className="co-item-img" />;
   };
 
   return (
@@ -118,6 +172,68 @@ const Checkout = () => {
         .co-field { margin-bottom: 1.25rem; }
         .co-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         @media(max-width: 640px) { .co-grid2 { grid-template-columns: 1fr; } }
+
+        /* payment option */
+        .pay-option {
+          border: 1.5px solid rgba(0,0,0,0.09);
+          border-radius: 14px;
+          overflow: hidden;
+          margin-bottom: 0.75rem;
+          transition: border-color 0.2s;
+        }
+        .pay-option.active { border-color: #0D0D0D; }
+        .pay-header {
+          display: flex; align-items: center; gap: 0.85rem;
+          padding: 1rem 1.25rem; cursor: pointer;
+          transition: background 0.15s;
+          user-select: none;
+        }
+        .pay-header:hover { background: #fafafa; }
+        .pay-option.active .pay-header { background: #0D0D0D; }
+        .pay-icon { font-size: 1.4rem; flex-shrink: 0; }
+        .pay-name {
+          font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem;
+          color: #0D0D0D; flex: 1;
+          transition: color 0.15s;
+        }
+        .pay-option.active .pay-name { color: #fff; }
+        .pay-chevron {
+          width: 18px; height: 18px; flex-shrink: 0;
+          color: #bbb; transition: transform 0.25s, color 0.15s;
+        }
+        .pay-option.active .pay-chevron { color: rgba(255,255,255,0.6); }
+        .pay-chevron.open { transform: rotate(180deg); }
+
+        /* instructions drawer */
+        .pay-drawer {
+          max-height: 0; overflow: hidden;
+          transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        .pay-drawer.open { max-height: 400px; }
+        .pay-drawer-inner {
+          padding: 1rem 1.25rem 1.25rem;
+          background: #FAFAF9;
+          border-top: 1px solid rgba(0,0,0,0.06);
+        }
+        .pay-number {
+          font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800;
+          color: #0D0D0D; letter-spacing: 0.04em;
+          background: #F0EEE9; border-radius: 8px;
+          padding: 0.6rem 1rem; margin-bottom: 1rem;
+          display: inline-block;
+        }
+        .pay-steps { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+        .pay-step {
+          display: flex; align-items: flex-start; gap: 0.6rem;
+          font-size: 0.83rem; color: #555; line-height: 1.5;
+        }
+        .pay-step-num {
+          flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
+          background: #0D0D0D; color: #fff;
+          font-family: 'Syne', sans-serif; font-size: 0.65rem; font-weight: 700;
+          display: flex; align-items: center; justify-content: center;
+          margin-top: 1px;
+        }
       `}</style>
 
       <div className="co-root">
@@ -177,29 +293,54 @@ const Checkout = () => {
                 <div className="co-card">
                   <div className="co-section-title">{t("checkout.payment_method") || "Payment Method"}</div>
 
-                  <div
-                    onClick={() => setPaymentMethod("cash")}
-                    style={{
-                      display: "flex", alignItems: "center", gap: "0.75rem",
-                      background: paymentMethod === "cash" ? "#0D0D0D" : "#F7F5F2",
-                      color: paymentMethod === "cash" ? "#fff" : "#0D0D0D",
-                      borderRadius: 14, padding: "1rem 1.25rem", cursor: "pointer",
-                      marginBottom: "0.75rem", border: "1px solid rgba(0,0,0,0.08)",
-                      transition: "all 0.2s"
-                    }}
-                  >
-                    <div style={{ fontSize: "1.5rem" }}>🔒</div>
-                    <div>
-                      <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "0.95rem", marginBottom: "0.2rem" }}>
-                        {t("checkout.cash_on_delivery") || "Cash on Delivery"}
-                      </div>
-                      <div style={{ fontSize: "0.8rem", opacity: 0.5, fontWeight: 300 }}>
-                        {t("checkout.pay_when_arrives") || "Pay when your order arrives"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                  {PAYMENT_OPTIONS.map((opt) => {
+                    const isActive  = paymentMethod === opt.id;
+                    const isOpen    = expandedMethod === opt.id;
 
+                    return (
+                      <div key={opt.id} className={`pay-option ${isActive ? "active" : ""}`}>
+
+                        {/* clickable header */}
+                        <div
+                          className="pay-header"
+                          onClick={() => handleSelectMethod(opt.id)}
+                        >
+                          <span className="pay-icon">{opt.icon}</span>
+                          <span className="pay-name">{opt.label[lang]}</span>
+                          {/* chevron */}
+                          <svg
+                            className={`pay-chevron ${isOpen ? "open" : ""}`}
+                            viewBox="0 0 20 20" fill="none"
+                            stroke="currentColor" strokeWidth="2"
+                            strokeLinecap="round" strokeLinejoin="round"
+                          >
+                            <path d="M5 8l5 5 5-5" />
+                          </svg>
+                        </div>
+
+                        {/* collapsible instructions */}
+                        <div className={`pay-drawer ${isOpen ? "open" : ""}`}>
+                          <div className="pay-drawer-inner">
+                            <div style={{ fontSize: "0.72rem", color: "#999", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "0.5rem" }}>
+                              {lang === "ar" ? "رقم المحفظة" : "Wallet Number"}
+                            </div>
+                            <div className="pay-number">{opt.number}</div>
+                            <ol className="pay-steps">
+                              {opt.instructions[lang].map((step, i) => (
+                                <li key={i} className="pay-step">
+                                  <span className="pay-step-num">{i + 1}</span>
+                                  <span>{step}</span>
+                                </li>
+                              ))}
+                            </ol>
+                          </div>
+                        </div>
+
+                      </div>
+                    );
+                  })}
+
+                </div>
               </div>
 
               {/* Right — Summary */}
@@ -232,8 +373,6 @@ const Checkout = () => {
 
                     <div className="co-row"><span>{t("cart.subtotal")}</span><span className="co-row-val">EGP {subtotal.toFixed(0)}</span></div>
                     <div className="co-row"><span>{t("cart.shipping")}</span><span className="co-row-val" style={shipping === 0 ? { color: "#5FD87D" } : {}}>{shipping === 0 ? t("cart.free") : `EGP ${shipping}`}</span></div>
-                    <div className="co-row" style={{ marginBottom: 0 }}><span>{t("cart.tax")}</span><span className="co-row-val">EGP {tax.toFixed(0)}</span></div>
-
                     <hr className="co-divider" />
 
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
@@ -242,14 +381,38 @@ const Checkout = () => {
                     </div>
                   </div>
 
+                  {/* WhatsApp confirmation notice */}
+                  <div style={{
+                    background: "#F0F7F0",
+                    border: "1px solid #C8E6C9",
+                    borderRadius: 14,
+                    padding: "1rem 1.25rem",
+                    display: "flex",
+                    gap: "0.75rem",
+                    alignItems: "flex-start",
+                  }}>
+                    <span style={{ fontSize: "1.1rem", flexShrink: 0, marginTop: "1px" }}></span>
+                    <div>
+                      <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "0.78rem", color: "#2E7D32", marginBottom: "0.25rem", letterSpacing: "0.02em" }}>
+                        {lang === "ar" ? "تأكيد الطلب عبر واتساب" : "Order Confirmation via WhatsApp"}
+                      </div>
+                      <div style={{ fontSize: "0.78rem", color: "#4CAF50", lineHeight: 1.55 }}>
+                        {lang === "ar"
+                          ? "بعد إتمام التحويل، أرسل لقطة شاشة التحويل على واتساب. لن يتم تأكيد طلبك أو تجهيزه إلا بعد استلام الإثبات."
+                          : "After completing the transfer, please send a screenshot to our WhatsApp. Your order will not be confirmed or processed until we receive proof of payment."
+                        }
+                      </div>
+                    </div>
+                  </div>
+
                   <button
                     type="button"
                     className="co-btn"
-                    disabled={loading || productsInCart.length === 0}
+                    disabled={loading || productsInCart.length === 0 || !paymentMethod}
                     onClick={handleSubmit}
                   >
-                    {loading 
-                      ? (t("checkout.placing_order") || "Placing Order...") 
+                    {loading
+                      ? (t("checkout.placing_order") || "Placing Order...")
                       : `${t("checkout.place_order") || "Place Order"} · EGP ${total.toFixed(0)}`
                     }
                   </button>

@@ -33,7 +33,7 @@ const ProductCard = ({ product }: { product: Product }) => {
 
   return (
     <Link
-      to={`/products/${product._id}`}
+      to={`/product/${product._id}`}
       className="flex-none w-[42vw] max-w-[180px] sm:w-[38vw] sm:max-w-[210px] group"
       style={{ WebkitTapHighlightColor: "transparent" }}
     >
