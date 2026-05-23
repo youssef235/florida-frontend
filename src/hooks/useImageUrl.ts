@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const SERVER_URL = "https://embezzle-phoenix-swinging.ngrok-free.dev";
+const SERVER_URL = "https://florida.king-prime.com/api";
 
 export type ImageState = "loading" | "loaded" | "error";
 

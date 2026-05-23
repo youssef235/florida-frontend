@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const customFetch = axios.create({
-  baseURL: "https://embezzle-phoenix-swinging.ngrok-free.dev",
+  baseURL: "/api",  // ✅ هيمر من الـ proxy
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",

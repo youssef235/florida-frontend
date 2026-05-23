@@ -90,13 +90,14 @@ const SidebarMenu = ({
   }, [isSidebarOpen]);
 
   // Logout handler
-  const logout = useCallback(() => {
+const logout = useCallback(() => {
     toast.success(t("sidebar.logout_success"));
     localStorage.removeItem("user");
+    localStorage.removeItem("token"); // ← أضف السطر ده
     store.dispatch(setLoginStatus(false));
     setIsSidebarOpen(false);
     navigate("/login");
-  }, [t, setIsSidebarOpen, navigate]);
+}, [t, setIsSidebarOpen, navigate]);
 
   // Prevent body scroll when sidebar is open
   useEffect(() => {

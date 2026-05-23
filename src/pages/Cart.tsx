@@ -79,10 +79,8 @@ const Cart = () => {
     const num = Number(val);
     return isNaN(num) ? 0 : num;
   };
+const total = subtotal; // بدون شحن في الكارت
 
-  const shippingCost = subtotal > 500 || subtotal === 0 ? 0 : 20;
-  const tax = subtotal * 0.14;
-  const total = subtotal + shippingCost + tax;
 
   const isCartEmpty = productsInCart.length === 0;
 
@@ -652,30 +650,19 @@ const Cart = () => {
                 {t("cart.order_summary")}
               </div>
 
-              {subtotal > 500 && !isCartEmpty && (
-                <div className="c-free-badge">
-                  <HiLockClosed size={16} />
-                  {t("cart.free_shipping_applied")}
-                </div>
-              )}
-
               <div className="c-summary-row">
                 <span className="label">{t("cart.subtotal")}</span>
                 <strong className="value">{safeNumber(subtotal).toLocaleString()} EGP</strong>
               </div>
 
-              <div className="c-summary-row">
-                <span className="label">{t("cart.shipping")}</span>
-                <strong className="value" style={{ color: shippingCost === 0 ? 'var(--success)' : 'inherit' }}>
-                  {shippingCost === 0 ? t("cart.free") : `${shippingCost} EGP`}
-                </strong>
-              </div>
+     <div className="c-summary-row">
+  <span className="label">{t("cart.shipping")}</span>
+  <strong className="value" style={{ color: '#94a3b8', fontSize: '0.85rem' }}>
+    {t("cart.shipping_tbd") || "Determined at checkout"}
+  </strong>
+</div>
 
-              <div className="c-summary-row">
-                <span className="label">{t("cart.tax")}</span>
-                <strong className="value">{safeNumber(tax).toLocaleString()} EGP</strong>
-              </div>
-
+          
               <div className="c-summary-row total">
                 <span className="label">{t("cart.total")}</span>
                 <span className="value">{safeNumber(total).toLocaleString()} EGP</span>

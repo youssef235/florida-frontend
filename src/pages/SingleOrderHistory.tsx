@@ -86,9 +86,8 @@ const SingleOrderHistory = () => {
       0
     ) ?? 0;
 
-  const shipping = subtotal > 500 ? 0 : 20;
-  const tax = subtotal * 0.14;
-  const total = subtotal + shipping + tax;
+const total = order?.totalAmount ?? subtotal;
+const shipping = total - subtotal;
 
   return (
     <>
@@ -238,11 +237,7 @@ const SingleOrderHistory = () => {
                   <span>{shipping === 0 ? t("order.free") : `EGP ${shipping}`}</span>
                 </div>
 
-                <div className="so-row">
-                  <span>{t("order.tax")}</span>
-                  <span>EGP {tax.toFixed(0)}</span>
-                </div>
-
+ 
                 <hr style={{ border: "none", borderTop: "1px solid rgba(255,255,255,0.1)", margin: "1.25rem 0" }} />
 
                 <div style={{ display: "flex", justifyContent: "space-between" }}>

@@ -20,8 +20,11 @@
     "logout_success": "Logged out successfully",
     "footer": "© 2024 All rights reserved"
   },
+
     "cart": {
     "shopping_bag": "Shopping Bag",
+      "shipping_tbd": "Determined at checkout"
+,
     "continue_shopping": "Continue Shopping",
     "loading": "Loading your cart...",
     "empty_title": "Your Bag is Empty",

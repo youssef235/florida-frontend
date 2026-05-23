@@ -20,6 +20,7 @@
     "add_to_bag": "أضف إلى السلة",
     "added_to_bag": "تمت الإضافة إلى السلة"
   },
+
   "order": {
   "back": "رجوع للطلبات",
   "details_title": "تفاصيل الطلب",
@@ -151,6 +152,8 @@
   },
   "cart": {
     "shopping_bag": "حقيبة التسوق",
+      "shipping_tbd": "سيتم تحديده عند الطلب"
+,
     "continue_shopping": "مواصلة التسوق",
     "loading": "جاري تحميل السلة...",
     "empty_title": "حقيبتك فارغة",

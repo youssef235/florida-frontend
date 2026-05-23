@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import CategoryItem from "./CategoryItem";
 import customFetch from "../axios/custom";
 import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 const CategoriesSection = () => {
   const [categories, setCategories] = useState([]);
 const { t } = useTranslation();
+  const lang = i18n.language;
+
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -31,10 +34,10 @@ const { t } = useTranslation();
       <div className="grid grid-cols-2 gap-6 max-w-[1500px] mx-auto">
   {categories.map((cat: any) => (
   <CategoryItem
-    key={cat._id}
-    categoryTitle={cat.name || "Untitled"}
-    categoryId={cat._id}
-    categoryImage={cat.image} // Even if this is undefined, the new getImageUrl handles it
+      key={cat.id}
+      categoryTitle={lang === 'ar' ? cat.name : (cat.nameEn || cat.name)}
+      categoryId={cat.id}
+      categoryImage={cat.image}
   />
 ))}
       </div>

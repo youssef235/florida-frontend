@@ -9,22 +9,49 @@ import { fetchWishlist, removeFromWishlist } from "../features/wishlist/wishlist
 import ProductItem from "../components/ProductItem";
 
 const WishlistPage = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dispatch = useAppDispatch();
-  const { items, loading, error } = useAppSelector((state) => state.wishlist);
+  const { items, loading } = useAppSelector((state) => state.wishlist);
+  const { loginStatus } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    dispatch(fetchWishlist());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (error) toast.error(error);
-  }, [error]);
+    if (loginStatus) {
+      dispatch(fetchWishlist());
+    }
+  }, [dispatch, loginStatus]);
 
   const handleRemove = async (productId: string) => {
     await dispatch(removeFromWishlist(productId));
     toast.success(t("wishlist.removed"));
   };
+
+  // ✅ لو مش مسجل دخول
+  if (!loginStatus) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4 px-4">
+        <HiOutlineHeart className="text-5xl text-gray-200" />
+        <p className="text-gray-500 text-lg text-center">
+          {i18n.language === "ar"
+            ? "يجب تسجيل الدخول لعرض المفضلة"
+            : "Please login to view your wishlist"}
+        </p>
+        <div className="flex gap-3">
+          <Link
+            to="/login"
+            className="px-6 py-3 bg-black text-white rounded-full text-sm uppercase tracking-widest hover:bg-gray-800 transition-colors"
+          >
+            {i18n.language === "ar" ? "تسجيل الدخول" : "Login"}
+          </Link>
+          <Link
+            to="/register"
+            className="px-6 py-3 border border-black text-black rounded-full text-sm uppercase tracking-widest hover:bg-gray-50 transition-colors"
+          >
+            {i18n.language === "ar" ? "إنشاء حساب" : "Register"}
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white px-4 sm:px-6 lg:px-10 py-8">
@@ -66,7 +93,6 @@ const WishlistPage = () => {
                   oldPrice={product.priceTags?.[0]?.oldPrice || null}
                   variant="detailed"
                 />
-
                 <button
                   onClick={() => handleRemove(product.id)}
                   className="absolute top-3 right-3 z-20 bg-white/95 hover:bg-white shadow-md rounded-full p-2 transition-all"

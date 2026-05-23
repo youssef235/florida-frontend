@@ -1,24 +1,27 @@
 import { HiChevronDown } from "react-icons/hi2";
-import { FiPhone, FiMail, FiMapPin, FiInstagram, FiFacebook, FiTwitter } from "react-icons/fi";
+import { FiPhone, FiMail, FiMapPin, FiInstagram } from "react-icons/fi";
+import { SiTiktok } from "react-icons/si";
 import { useTranslation } from "react-i18next";
 
 const Footer = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isAr = i18n.language === "ar";
 
   return (
     <>
       <footer style={{ background: "#0D0D0D", color: "#fff", fontFamily: "'DM Sans', sans-serif" }}>
         <style>{`
           @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
-          .ft-link { color: rgba(255,255,255,0.5); font-size: 0.9rem; cursor: pointer; transition: color 0.2s; display: block; margin-bottom: 0.6rem; }
+          .ft-link { color: rgba(255,255,255,0.5); font-size: 0.9rem; cursor: pointer; transition: color 0.2s; display: block; margin-bottom: 0.6rem; text-decoration: none; }
           .ft-link:hover { color: #fff; }
           .ft-divider { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 0; }
-          .ft-contact { display: flex; align-items: center; gap: 0.6rem; color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 0.75rem; }
-          .ft-contact svg { color: #fff; flex-shrink: 0; }
-          .ft-social { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.6); }
+          .ft-contact { display: flex; align-items: flex-start; gap: 0.6rem; color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 0.75rem; text-decoration: none; }
+          .ft-contact svg { color: #fff; flex-shrink: 0; margin-top: 2px; }
+          .ft-contact:hover { color: rgba(255,255,255,0.8); }
+          .ft-social { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.6); text-decoration: none; }
           .ft-social:hover { background: #fff; color: #0D0D0D; border-color: #fff; }
           .ft-col-title { font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 1.25rem; }
-          .ft-bottom-link { color: rgba(255,255,255,0.35); font-size: 0.78rem; cursor: pointer; transition: color 0.2s; }
+          .ft-bottom-link { color: rgba(255,255,255,0.35); font-size: 0.78rem; cursor: pointer; transition: color 0.2s; text-decoration: none; }
           .ft-bottom-link:hover { color: #fff; }
         `}</style>
 
@@ -39,9 +42,24 @@ const Footer = () => {
                 {t("footer.description")}
               </p>
               <div style={{ display: "flex", gap: "0.6rem" }}>
-                <div className="ft-social"><FiInstagram size={16} /></div>
-                <div className="ft-social"><FiFacebook size={16} /></div>
-                <div className="ft-social"><FiTwitter size={16} /></div>
+                <a
+                  href="https://www.instagram.com/florida.egy?igsh=bjBudHcxNWFnNmpq&utm_source=qr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ft-social"
+                  aria-label="Instagram"
+                >
+                  <FiInstagram size={16} />
+                </a>
+                <a
+                  href="https://www.tiktok.com/@florida.egy?_r=1&_t=ZS-96Ft7Ork3KH"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ft-social"
+                  aria-label="TikTok"
+                >
+                  <SiTiktok size={15} />
+                </a>
               </div>
             </div>
 
@@ -75,22 +93,49 @@ const Footer = () => {
             {/* Contact */}
             <div>
               <div className="ft-col-title">{t("footer.contact_us")}</div>
-              <div className="ft-contact">
+
+              {/* Address */}
+              <a
+                href="https://maps.google.com/?q=بلبيس+الشرقية+مصر"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ft-contact"
+              >
                 <FiMapPin size={15} />
-                <span>123 ميدان التحرير، القاهرة، مصر</span>
-              </div>
-              <div className="ft-contact">
+                <span>
+                  {isAr
+                    ? "الشرقية، بلبيس، المنشية — آخر الشارع أمام استديو حماده"
+                    : "Al Sharqia, Bilbeis, Al Manshia — End of the street, opposite Hamada Studio"}
+                </span>
+              </a>
+
+              {/* Phone */}
+              <a href="tel:+201024230577" className="ft-contact">
                 <FiPhone size={15} />
-                <span>+20 10 0000 0000</span>
-              </div>
-              <div className="ft-contact">
-                <FiPhone size={15} />
-                <span>+20 11 0000 0000</span>
-              </div>
-              <div className="ft-contact">
-                <FiMail size={15} />
-                <span>info@florida-store.com</span>
-              </div>
+                <span>01024230577</span>
+              </a>
+
+              {/* Instagram */}
+              <a
+                href="https://www.instagram.com/florida.egy?igsh=bjBudHcxNWFnNmpq&utm_source=qr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ft-contact"
+              >
+                <FiInstagram size={15} />
+                <span>@florida.egy</span>
+              </a>
+
+              {/* TikTok */}
+              <a
+                href="https://www.tiktok.com/@florida.egy?_r=1&_t=ZS-96Ft7Ork3KH"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ft-contact"
+              >
+                <SiTiktok size={14} />
+                <span>@florida.egy</span>
+              </a>
             </div>
 
           </div>
